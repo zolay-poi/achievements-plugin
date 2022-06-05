@@ -1,10 +1,10 @@
-// 成就统计
 import path from 'path';
 import fs from 'fs';
 import Page from '../utils/Page.js';
 import {Data, _paths, getMysApi, achievementsMap} from '../utils/common.js';
 import {segment} from 'oicq';
 
+// 成就查漏功能
 export async function actStatistics(e, {render}) {
   let MysApi = await getMysApi(e);
   if (!MysApi) return true;
@@ -19,7 +19,7 @@ export async function actStatistics(e, {render}) {
 
   let userJsonName = `${uid}.json`;
   let userJsonFile = path.join(_paths.userDataPath, userJsonName);
-  let noImportHelp = '你尚未录入任何成就，无法查看成就统计，请发送“#成就帮助”来查看录入方法';
+  let noImportHelp = '你尚未录入任何成就，无法使用成就查漏功能，请发送“#成就帮助”来查看录入方法';
   if (!fs.existsSync(userJsonFile)) {
     e.replyAt(noImportHelp);
     return true;

@@ -1,6 +1,6 @@
-import {segment} from 'oicq';
 import fs from 'fs';
 import path from 'path';
+import {segment} from 'oicq';
 import {browserInit} from '../../../lib/render.js';
 import Data from '../../../lib/components/Data.js';
 import {_paths, getMysApi, downloadFiles, achievementsMap, _type} from '../utils/common.js';
@@ -190,7 +190,7 @@ async function downloadAndScanner(e, urls, type, MysApi) {
   }
   // Data.writeJson(userDataPath, userJsonName , saveData, '');
   fs.writeFileSync(userJsonFile, JSON.stringify(saveData));
-  e.replyAt(`本次成功识别了${successCount}个成就，新增记录了${saveCount}个成就。\n你可发送“#成就统计”来查看你尚未完成的成就。`);
+  e.replyAt(`本次成功识别了${successCount}个成就，新增记录了${saveCount}个成就。\n你可发送“#成就查漏”来查看你尚未完成的成就。`);
   return true;
 }
 

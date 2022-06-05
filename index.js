@@ -32,9 +32,10 @@ const actions = {
   '查漏,统计': bind(statisticsApp.actStatistics),
   // #成就帮助
   '帮助,help': bind(otherApp.help),
-  // #成就更新
-  // #成就强制更新
-  '更新': bind(otherApp.updateWithGit)
+  // #成就插件更新
+  // #成就插件强制更新
+  // 主人命令
+  '插件更新': bind(otherApp.updateWithGit)
 };
 const actionsMap = new Map();
 

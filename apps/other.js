@@ -59,5 +59,4 @@ export async function updateWithGit(e) {
 
   });
   return true;
-
 }
