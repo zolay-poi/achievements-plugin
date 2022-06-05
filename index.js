@@ -1,7 +1,11 @@
 import fs from 'fs';
 import * as statisticsApp from './apps/statistics.js';
 import * as importApp from './apps/import.js';
+import * as otherApp from './apps/other.js';
 import {_paths, loadAchievements, replyAt} from './utils/common.js';
+import common from '../../lib/common.js';
+
+const _version = '1.0.0';
 
 export const rule = {
   achRouter: {
@@ -18,13 +22,19 @@ export const rule = {
   },
 };
 
+// noinspection JSNonASCIINames
 const actions = {
   // #成就录入
   // 需要发送图片或者视频
   '录入,识别,扫描,记录': bind(importApp.achImport),
   // #成就查漏
   // 可以根据已经识别的成就生成未完成的成就列表
-  '查漏,统计': bind(statisticsApp.actStatistics)
+  '查漏,统计': bind(statisticsApp.actStatistics),
+  // #成就帮助
+  '帮助,help': bind(otherApp.help),
+  // #成就更新
+  // #成就强制更新
+  '更新': bind(otherApp.updateWithGit)
 };
 const actionsMap = new Map();
 
@@ -64,7 +74,18 @@ function init() {
   if (!fs.existsSync(_paths.userDataPath)) {
     fs.mkdirSync(_paths.userDataPath);
   }
-  console.log(`成就查漏插件初始化完成~`);
+  console.log(`成就查漏插件${_version}初始化完成~`);
+
+  setTimeout(async function () {
+    let msgStr = await redis.get("zolay:restart-msg");
+    if (msgStr) {
+      let msg = JSON.parse(msgStr);
+      await common.relpyPrivate(msg.qq, msg.msg);
+      await redis.del("zolay:restart-msg");
+      let msgs = [`当前插件版本: ${_version}`];
+      await common.relpyPrivate(msg.qq, msgs.join("\n"));
+    }
+  }, 1000);
 }
 
 init();

@@ -55,7 +55,7 @@ export function loadAchievements(force) {
       findNextStage(achievement, json.achievements);
       achievementsMap.set(achievement.id, achievement);
     }
-    console.log(achievementsMap.values());
+    // console.log(achievementsMap.values());
     return true;
   } else {
     return false;

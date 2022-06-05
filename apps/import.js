@@ -126,7 +126,16 @@ async function downloadAndScanner(e, urls, type, MysApi) {
     return true;
   }
   // 调用椰羊进行成就扫描
-  let {result, dup} = await cocoGoatScanner(filePaths, type, e);
+  let result;
+  try {
+    // {result, dup}
+    let results = await cocoGoatScanner(filePaths, type, e);
+    result = results.result;
+  } catch (err) {
+    console.error(err)
+    e.replyAt(`${err.message || err}`);
+    return true;
+  }
   // console.log({result, dup});
   // 删除临时文件
   filePaths.forEach((file) => fs.unlink(file, () => 0));
@@ -149,7 +158,7 @@ async function downloadAndScanner(e, urls, type, MysApi) {
         doneList.push(achItem);
       }
     } else {
-      console.log('fail', {item});
+      // console.log('fail', {item});
       failCount++;
     }
   }
@@ -187,7 +196,6 @@ async function downloadAndScanner(e, urls, type, MysApi) {
 
 /** 对接椰羊的成就扫描 */
 async function cocoGoatScanner(fileList, type, e) {
-  console.log(fileList);
   return new Promise(async (resolve, reject) => {
     let browser = await browserInit();
     if (!browser) {
@@ -206,6 +214,11 @@ async function cocoGoatScanner(fileList, type, e) {
         }
       });
     });
+    let progressTimer
+    let timeout = setTimeout(() => {
+      reject('椰羊启动超时，请稍后重试……');
+      page.close();
+    }, 15000);
     // 监听页面的console，实现与页面的通讯
     page.on('console', async message => {
       // 约定的协议：
@@ -217,64 +230,71 @@ async function cocoGoatScanner(fileList, type, e) {
         key = await key.jsonValue();
         if (key === 'YUNZAI_CONSOLE_EXCHANGE') {
           let json = await payload.jsonValue();
-          console.log(json);
           if (json) {
             let {event, data} = json;
             if (event === 'load') {
               // 椰羊加载完成，开始上传文件
               if (data === true) {
-                console.log('椰羊加载完成，开始上传文件: ', fileList);
+                clearInterval(timeout);
                 let frame = page.frames()[1];
 
-                await new Promise(resolve => setTimeout(resolve, 3000));
-                let body = await frame.$('body');
-                let base64 = await body.screenshot({
-                  type: 'jpeg',
-                  encoding: 'base64',
-                });
-                if (base64) {
-                  e.reply(['001', segment.image(`base64://${base64}`)]);
-                }
+                // // --- debug ---
+                // let body = await frame.$('body');
+                // await frame.waitForTimeout(3000);
+                // base64 = await body.screenshot({type: 'jpeg', encoding: 'base64',});
+                // if (base64) {
+                //   e.reply(['001', segment.image(`base64://${base64}`)]);
+                // }
 
                 // 获取 fileInput
                 const inputEl = await frame.waitForSelector('#toki div.top input');
                 // uploadFile 上传图片
-                await inputEl.uploadFile(...(fileList).map(i =>  i.replace(/\\/g, '/')));
+                await inputEl.uploadFile(...fileList);
                 await frame.waitForTimeout(1000);
 
-                await new Promise(resolve => setTimeout(resolve, 3000));
-                base64 = await body.screenshot({
-                  type: 'jpeg',
-                  encoding: 'base64',
-                });
-                if (base64) {
-                  e.reply(['002', segment.image(`base64://${base64}`)]);
-                }
+                // // --- debug ---
+                // await frame.waitForTimeout(3000);
+                // base64 = await body.screenshot({type: 'jpeg', encoding: 'base64',});
+                // if (base64) {
+                //   e.reply(['002', segment.image(`base64://${base64}`)]);
+                // }
 
                 // 获取“识别”按钮并点击
                 const btnEl = await frame.waitForSelector('#toki div.top button');
                 await btnEl.click();
 
-                await new Promise(resolve => setTimeout(resolve, 3000));
-                base64 = await body.screenshot({
-                  type: 'jpeg',
-                  encoding: 'base64',
-                });
-                if (base64) {
-                  e.reply(['003', segment.image(`base64://${base64}`)]);
-                }
+                // // --- debug ---
+                // await frame.waitForTimeout(3000);
+                // base64 = await body.screenshot({type: 'jpeg', encoding: 'base64',});
+                // if (base64) {
+                //   e.reply(['003', segment.image(`base64://${base64}`)]);
+                // }
 
+                // 进度超时
+                progressTimer = setTimeout(() => {
+                  if (type === _type.VIDEO) {
+                    reject('扫描超时，你可能使用了不完整的chrome，导致录屏扫描功能不可用，请发送“#成就帮助”来获取帮助。');
+                  } else {
+                    reject('扫描超时，请稍后重试……');
+                  }
+                  page.close();
+                }, 12000);
+              } else if (data === false) {
+                clearInterval(timeout);
+                page.close();
+                reject('椰羊加载失败，请稍后重试……');
               }
             } else if (event === 'progress') {
               // 扫描进度
+              clearTimeout(progressTimer);
             } else if (event === 'result') {
+              page.close();
               // 扫描结果
               resolve(data);
-              await page.close();
             } else {
-              console.group(`--- 椰羊 ---`);
-              console.log(json);
-              console.groupEnd();
+              // console.group(`--- 椰羊 ---`);
+              // console.log(json);
+              // console.groupEnd();
             }
           }
         }
