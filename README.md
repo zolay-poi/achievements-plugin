@@ -1,6 +1,6 @@
 # 成就查漏功能说明
 
-`achievements-plugin` 是` `Yunzai-Bot`的扩展插件，提供成就查漏功能。
+`achievements-plugin`是`Yunzai-Bot`的扩展插件，提供成就查漏功能。
 
 具体功能可在安装插件后，通过发送`#成就帮助`来进行查看。
 
