@@ -7,7 +7,7 @@ const _path = process.cwd();
 export async function help(e) {
   let msg = ['成就查漏帮助：https://docs.qq.com/doc/DWmVRSnRwRldzcm13'];
   if (e.isMaster) {
-    msg.push('\n主人帮助：https://docs.qq.com/doc/DWmVRSnRwRldzcm13');
+    msg.push('\n主人帮助：https://docs.qq.com/doc/DWktCdVJsWmFybUpi');
   }
   e.reply(msg);
   return true;
