@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>成就统计</title>
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}/template/style/common.css"/>
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}/template/style/statistics.css"/>
+</head>
+<body>
+
+<div id="container">
+  <div class="background"></div>
+  <div class="info">
+    <div class="left">
+      <div class="name">天地万象</div>
+      <div class="count">
+        达成成就<span>{{achievement_number}}</span>个
+      </div>
+    </div>
+    <div class="right">
+      <div class="avatar">
+        <img src="https://q1.qlogo.cn/g?b=qq&s=0&nk={{user_id}}" alt="头像"/>
+      </div>
+      <div class="detail">
+        <div class="name">{{name}}</div>
+        <div class="uid">UID：{{uid}}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="list">
+    <div class="bag-top"></div>
+    <div class="bag-middle" style="height: {{middleHeight}}px"></div>
+    <div class="bag-bottom"></div>
+    <div class="item-box">
+      {{each page.records item}}
+      <div class="item icon0">
+        <div class="name">{{item.name}}</div>
+        <div class="desc">{{item.desc}}</div>
+        <div class="reward">
+          <div class="reward-num">{{item.reward}}</div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+    <div class="page-info">{{pageInfo}}</div>
+  </div>
+
+  <div class="copyright">Created By Yunzai-Bot & Zolay-Poi</div>
+
+</div>
+
+</body>
+</html>
