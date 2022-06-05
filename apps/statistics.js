@@ -35,12 +35,11 @@ export async function actStatistics(e, {render}) {
     e.replyAt(noImportHelp);
     return true;
   }
-  // 过滤测试数据
-  let filters = [84027];
   // 遍历未完成的成就
   let list = [];
   for (const [id, achievement] of achievementsMap.entries()) {
-    if (filters.includes(id)) continue;
+    // 过滤未实装的成就
+    if (NO_INSTALLATION.includes(id)) continue;
     if (achievement.preStage != null) continue;
     if (doneList.findIndex(i => i.id === achievement.id) === -1) {
       list.push(achievement);
@@ -79,7 +78,7 @@ export async function actStatistics(e, {render}) {
   });
   if (base64) {
     e.replyAt([
-      `\n在「天地万象」中你还有 ${page.total} 个成就未完成，详情见下图`,
+      `在「天地万象」中你还有 ${page.total} 个成就未完成，详情见下图`,
       segment.image(`base64://${base64}`),
     ]);
   } else {
@@ -87,3 +86,33 @@ export async function actStatistics(e, {render}) {
   }
   return true;
 }
+
+/** 未实装的成就列表 */
+const NO_INSTALLATION = [
+  // 测试数据
+  84027,
+  // 绀田祟神
+  81101,
+  // 在提瓦特寻求昭和七四式是不是搞错了什么？
+  81102,
+  // 狸猫的报恩
+  81103,
+  // 丽影萍踪
+  81107,
+  // 「第七个武士」
+  81110,
+  // 谁打碎了我的陶罐
+  81126,
+  // 戳穿绀田传助的谎言
+  81127,
+  // 她的愿望
+  81128,
+  // 为了未来的鸣神…
+  81129,
+  // 「我有金钟罩♬」
+  82016,
+  // 善事有善报
+  84517,
+  // 未曾设想的味道
+  84521,
+];

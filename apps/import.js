@@ -135,10 +135,10 @@ async function downloadAndScanner(e, urls, type, MysApi) {
     console.error(err)
     e.replyAt(`${err.message || err}`);
     return true;
+  } finally {
+    // 删除临时文件
+    filePaths.forEach((file) => fs.unlink(file, () => 0));
   }
-  // console.log({result, dup});
-  // 删除临时文件
-  filePaths.forEach((file) => fs.unlink(file, () => 0));
   let successCount = 0, failCount = 0, doneList = [];
   for (const item of result) {
     if (item.success) {
