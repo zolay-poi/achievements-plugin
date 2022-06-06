@@ -3,7 +3,7 @@ import path from 'path';
 import {segment} from 'oicq';
 import {browserInit} from '../../../lib/render.js';
 import Data from '../../../lib/components/Data.js';
-import {_paths, getMysApi, downloadFiles, achievementsMap, _type} from '../utils/common.js';
+import {_paths, readUserJson, getMysApi, downloadFiles, achievementsMap, _type} from '../utils/common.js';
 
 let userTimer = {};
 
@@ -16,7 +16,7 @@ export async function achImport(e) {
     return true;
   }
   if (!e.img || e.img.length === 0) {
-    e.replyAt('请发送成就截图或录屏文件');
+    e.replyAt('请发送成就截图、录屏文件或椰羊JSON');
     if (userTimer[e.user_id]) {
       clearTimeout(userTimer[e.user_id]);
     }
@@ -77,8 +77,9 @@ export async function achImportCheck(e) {
   if (file) {
     let isImage = /\.(jpg|png|jpeg)$/.test(file.name);
     let isVideo = /\.(mp4)$/.test(file.name);
-    if (!isImage && !isVideo) {
-      e.replyAt('发送的文件不是静态图片或mp4格式的视频，成就录入已取消');
+    let isJson = /\.(json)$/.test(file.name);
+    if (!isImage && !isVideo && !isJson) {
+      e.replyAt('发送的文件不是静态图片或mp4格式的视频或椰羊JSON，成就录入已取消');
       return true;
     }
     let url;
@@ -86,6 +87,10 @@ export async function achImportCheck(e) {
       url = await e.group.getFileUrl(file.fid);
     } else {
       url = await e.friend.getFileUrl(file.fid);
+    }
+    // 从JSON导入成就
+    if (isJson) {
+      return importOfJson(e, url, MysApi);
     }
     let type = isImage ? _type.IMAGE : _type.VIDEO;
     return downloadAndScanner(e, [url], type, MysApi);
@@ -167,14 +172,7 @@ async function downloadAndScanner(e, urls, type, MysApi) {
     return true;
   }
   let userJsonName = `${uid}.json`;
-  let userJsonFile = path.join(_paths.userDataPath, userJsonName);
-  let saveData = null;
-  if (fs.existsSync(userJsonFile)) {
-    saveData = Data.readJSON(_paths.userDataPath, userJsonName);
-  }
-  if (!saveData || !saveData.wonders_of_the_world) {
-    saveData = {wonders_of_the_world: []};
-  }
+  let {saveData, writeUserJson} = readUserJson(userJsonName);
   // 目前仅支持【天地万象】
   let saveDoneList = saveData.wonders_of_the_world;
   // 新增个数，重复个数
@@ -188,9 +186,65 @@ async function downloadAndScanner(e, urls, type, MysApi) {
       saveDoneList.push(achItem);
     }
   }
-  // Data.writeJson(userDataPath, userJsonName , saveData, '');
-  fs.writeFileSync(userJsonFile, JSON.stringify(saveData));
+  writeUserJson();
   e.replyAt(`本次成功识别了${successCount}个成就，新增记录了${saveCount}个成就。\n你可发送“#成就查漏”来查看你尚未完成的成就。`);
+  return true;
+}
+
+/** 从JSON导入成就 */
+async function importOfJson(e, url, MysApi) {
+  let uid = MysApi.targetUid;
+  // 下载JSON文件
+  const { filePaths } = await downloadFiles(e, [url], '.json');
+  if (filePaths.length === 0) {
+    e.replyAt(`文件下载失败…`);
+    return true;
+  }
+  let json = Data.readJSON(path.dirname(filePaths[0]), path.basename(filePaths[0]));
+  // 判断JSON类型
+  if (!json) {
+    e.replyAt(`发送的JSON文件为空…`);
+    return true;
+  }
+  let isCocoGoat = json.source === '椰羊成就';
+  // 待支持
+  let isUIAF = json.info && json.list;
+  if (isCocoGoat) {
+    return await importOfCocoGoatJson(e, json, uid);
+  } else if (isUIAF) {
+    e.replyAt(`UIAF格式的JSON文件尚未支持…`);
+    return true;
+  } else {
+    e.replyAt(`发送的不是椰羊JSON文件…`);
+    return true;
+  }
+}
+
+/** 从椰羊JSON导入 */
+async function importOfCocoGoatJson(e, json, uid) {
+  let userJsonName = `${uid}.json`;
+  let { saveData, writeUserJson } = readUserJson(userJsonName);
+  let saveDoneList = saveData.wonders_of_the_world;
+  // 新增个数，重复个数
+  let saveCount = 0, dupCount = 0;
+  // 去除重复的
+  let doneList = (json.value || {}).achievements || [];
+  for (const achItem of doneList) {
+    // 0 = 天地万象
+    if (achItem.categoryId !== 0) continue;
+    if (saveDoneList.findIndex(i => i.id === achItem.id) !== -1) {
+      dupCount++;
+    } else {
+      saveCount++;
+      saveDoneList.push({
+        id: achItem.id,
+        date: achItem.date,
+        status: achItem.status,
+      });
+    }
+  }
+  writeUserJson();
+  e.replyAt(`成功从椰羊识别到${doneList.length}个成就。\n「天地万象」中新增记录了${saveCount}个成就。\n你可发送“#成就查漏”来查看你尚未完成的成就。`);
   return true;
 }
 
