@@ -29,7 +29,7 @@ export async function updateWithGit(e) {
   }
   exec(command, {cwd: _paths.pluginsPath}, function (error, stdout, stderr) {
     //console.log(stdout);
-    if (/Already up to date/.test(stdout)) {
+    if (/Already up[ -]to[ -]date/.test(stdout)) {
       e.reply('目前已经是最新版了~');
       return true;
     }
