@@ -35,7 +35,10 @@ const actions = {
   // #成就插件更新
   // #成就插件强制更新
   // 主人命令
-  '插件更新': bind(otherApp.updateWithGit)
+  '插件更新': bind(otherApp.updateWithGit),
+  // #成就插件配置
+  // 主人命令
+  '插件配置': bind(otherApp.config),
 };
 const actionsMap = new Map();
 
