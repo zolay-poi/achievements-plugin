@@ -5,7 +5,7 @@ import * as otherApp from './apps/other.js';
 import {_paths, loadAchievements, replyAt} from './utils/common.js';
 import common from '../../lib/common.js';
 
-const _version = '1.0.0';
+const _version = '1.0.1';
 
 export const rule = {
   achRouter: {
