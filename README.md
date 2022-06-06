@@ -18,7 +18,7 @@
 
 直接将`achievements-plugin`放置在`Yunzai-Bot`的`plugins`目录下，重启`Yunzai-Bot`后即可使用。
 
-推荐使用git进行安装，以方便后续升级。在BOT根目录夹打开终端，运行
+推荐使用git进行安装，以方便后续升级。在BOT根目录下的plugins下打开终端，运行
 
 ```
 git clone https://gitee.com/zolay-poi/achievements-plugin.git
