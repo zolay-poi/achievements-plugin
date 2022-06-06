@@ -51,6 +51,8 @@ export function loadAchievements(force) {
   let json = Data.readJSON(resourcesPath, 'achievements/wonders_of_the_world.json');
   if (json && json.achievements) {
     for (const achievement of json.achievements) {
+      // 过滤重复成就数据，以椰羊上的ID为准（啊这……为什么会有重复数据？）
+      if (DUPLICATE_ID.includes(achievement.id)) continue;
       // 查找是否有系列成就
       findNextStage(achievement, json.achievements);
       achievementsMap.set(achievement.id, achievement);
@@ -62,6 +64,9 @@ export function loadAchievements(force) {
   }
 }
 
+/** 重复的，或者已经被废弃的成就ID */
+const DUPLICATE_ID = [81006, 81007, 81008, 81009, 81011, 81012, 81013, 81219, 82018, 82011];
+
 function findNextStage(achievement, achievements) {
   for (const next of achievements) {
     if (next.preStage === achievement.id) {
@@ -69,6 +74,21 @@ function findNextStage(achievement, achievements) {
       break;
     }
   }
+}
+
+/** 获取用户保存的成就数据 */
+export function readUserJson(jsonName) {
+  let userJsonFile = path.join(_paths.userDataPath, jsonName);
+  let saveData = null;
+  if (fs.existsSync(userJsonFile)) {
+    saveData = Data.readJSON(_paths.userDataPath, jsonName);
+  }
+  if (!saveData || !saveData.wonders_of_the_world) {
+    saveData = { wonders_of_the_world: [] };
+  }
+  // 保存JSON到本地
+  const writeUserJson = () => fs.writeFileSync(userJsonFile, JSON.stringify(saveData));
+  return { saveData, writeUserJson };
 }
 
 /** 自动判断是否需要艾特（只有群聊里才艾特） */

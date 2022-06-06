@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import Page from '../utils/Page.js';
-import {Data, _paths, getMysApi, achievementsMap} from '../utils/common.js';
+import {Data, _paths, getMysApi, achievementsMap, readUserJson} from '../utils/common.js';
 import {segment} from 'oicq';
 
 // 成就查漏功能
@@ -18,21 +18,11 @@ export async function actStatistics(e, {render}) {
   let {achievement_number} = res.stats;
 
   let userJsonName = `${uid}.json`;
-  let userJsonFile = path.join(_paths.userDataPath, userJsonName);
-  let noImportHelp = '你尚未录入任何成就，无法使用成就查漏功能，请发送“#成就帮助”来查看录入方法';
-  if (!fs.existsSync(userJsonFile)) {
-    e.replyAt(noImportHelp);
-    return true;
-  }
-  let saveData = Data.readJSON(_paths.userDataPath, userJsonName);
-  if (!saveData || !saveData.wonders_of_the_world) {
-    e.replyAt(noImportHelp);
-    return true;
-  }
+  let {saveData} = readUserJson(userJsonName)
   // 目前仅支持【天地万象】
   let doneList = saveData.wonders_of_the_world;
   if (doneList.length === 0) {
-    e.replyAt(noImportHelp);
+    e.replyAt('你尚未录入任何成就，无法使用成就查漏功能，请发送“#成就帮助”来查看录入方法');
     return true;
   }
   // 遍历未完成的成就
