@@ -209,8 +209,6 @@ async function cocoGoatScanner(fileList, type, e) {
       window.addEventListener('message', (ev) => {
         if (ev && ev.data && ev.data.app === 'cocogoat.scanner.achievement') {
           console.log('YUNZAI_CONSOLE_EXCHANGE', ev.data);
-        } else {
-          console.log('YUNZAI_CONSOLE_EXCHANGE', ev.data);
         }
       });
     });
