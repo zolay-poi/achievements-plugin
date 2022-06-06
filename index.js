@@ -5,7 +5,7 @@ import * as otherApp from './apps/other.js';
 import {_paths, loadAchievements, replyAt} from './utils/common.js';
 import common from '../../lib/common.js';
 
-const _version = '1.0.0';
+const _version = '1.0.1';
 
 export const rule = {
   achRouter: {
@@ -35,7 +35,10 @@ const actions = {
   // #成就插件更新
   // #成就插件强制更新
   // 主人命令
-  '插件更新': bind(otherApp.updateWithGit)
+  '插件更新': bind(otherApp.updateWithGit),
+  // #成就插件配置
+  // 主人命令
+  '插件配置': bind(otherApp.config),
 };
 const actionsMap = new Map();
 
