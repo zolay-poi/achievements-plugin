@@ -232,6 +232,8 @@ async function importOfCocoGoatJson(e, json, uid) {
   for (const achItem of doneList) {
     // 0 = 天地万象
     if (achItem.categoryId !== 0) continue;
+    // status为空也视为未完成的成就
+    if (!achItem.status) continue;
     if (saveDoneList.findIndex(i => i.id === achItem.id) !== -1) {
       dupCount++;
     } else {
