@@ -24,3 +24,5 @@ $RECYCLE.BIN/
 *.lnk
 
 .idea
+
+/resources/settings.json

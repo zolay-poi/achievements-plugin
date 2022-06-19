@@ -1,11 +1,10 @@
 import fs from 'fs';
 import * as statisticsApp from './apps/statistics.js';
 import * as importApp from './apps/import.js';
+import * as settingsApp from './apps/settings.js';
 import * as otherApp from './apps/other.js';
-import {_paths, loadAchievements, replyAt} from './utils/common.js';
+import {_version, _paths, loadAchievements, replyAt} from "./utils/common.js";
 import common from '../../lib/common.js';
-
-const _version = '1.0.1';
 
 export const rule = {
   achRouter: {
@@ -24,6 +23,9 @@ export const rule = {
 
 // noinspection JSNonASCIINames
 const actions = {
+  // #成就插件配置
+  // 主人命令
+  '配置': bind(settingsApp.settingsRouter),
   // #成就录入
   // 需要发送图片或者视频
   '录入,识别,扫描,记录': bind(importApp.achImport),
@@ -36,9 +38,6 @@ const actions = {
   // #成就插件强制更新
   // 主人命令
   '插件更新': bind(otherApp.updateWithGit),
-  // #成就插件配置
-  // 主人命令
-  '插件配置': bind(otherApp.config),
 };
 const actionsMap = new Map();
 

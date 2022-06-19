@@ -60,7 +60,3 @@ export async function updateWithGit(e) {
   });
   return true;
 }
-
-export async function config(e) {
-  
-}

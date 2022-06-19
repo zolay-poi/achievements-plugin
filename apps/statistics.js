@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import Page from '../utils/Page.js';
+import Page from '../models/Page.js';
 import {Data, _paths, getMysApi, achievementsMap, readUserJson} from '../utils/common.js';
 import {segment} from 'oicq';
 

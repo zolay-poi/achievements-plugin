@@ -7,6 +7,7 @@ import {promisify} from 'util';
 import {pipeline} from 'stream';
 import Data from '../../../lib/components/Data.js';
 import {browserInit} from '../../../lib/render.js';
+import Settings from "../models/Settings.js";
 
 const pluginName = 'achievements-plugin';
 const _path = process.cwd();
@@ -14,10 +15,14 @@ const _path = process.cwd();
 const pluginsPath = path.join(_path, 'plugins', pluginName);
 // 资源目录
 const resourcesPath = path.join(pluginsPath, 'resources');
+// 配置目录
+const settingsPath = path.join(resourcesPath, 'settings.json');
 // 模板目录
 const templatePath = path.join(resourcesPath, 'template');
 // 用户已完成的成就记录保存目录
 const userDataPath = path.join(_path, 'data', pluginName);
+
+export const _version = '1.0.2';
 
 export const _paths = {
   rootPath: _path,
@@ -25,12 +30,15 @@ export const _paths = {
   resourcesPath,
   templatePath,
   userDataPath,
+  settingsPath,
 };
 
 export const _type = {
   IMAGE: 'image',
   VIDEO: 'video',
 };
+
+export const settings = new Settings();
 
 // 全成就 map
 export const achievementsMap = new Map();
