@@ -1,13 +1,18 @@
 import fs from 'fs';
 import path from 'path';
-import {segment} from 'oicq';
-import {browserInit} from '../../../lib/render.js';
+import { segment } from 'oicq';
+import { browserInit } from '../../../lib/render.js';
 import Data from '../../../lib/components/Data.js';
-import {_paths, readUserJson, getMysApi, downloadFiles, achievementsMap, _type} from '../utils/common.js';
+import { _paths, settings, readUserJson, getMysApi, downloadFiles, achievementsMap, _method } from '../utils/common.js';
 
 let userTimer = {};
 
 export async function achImport(e) {
+  let enabled = settings.importMethod.enabled
+  if (enabled.length === 0) {
+    e.replyAt('成就录入功能已被完全禁用……');
+    return true;
+  }
   let MysApi = await getMysApi(e);
   if (!MysApi) return true;
   let uid = MysApi.targetUid;
@@ -15,28 +20,32 @@ export async function achImport(e) {
     e.replyAt('请先绑定uid');
     return true;
   }
-  if (!e.img || e.img.length === 0) {
-    e.replyAt('请发送成就截图、录屏文件或椰羊JSON');
+  // 消息中携带图片
+  if (e.img && e.img.length > 0) {
+    return downloadAndScanner(e, e.img, _method.IMAGE, MysApi);
+  }
+  // 消息中携带成就ID
+  let ids = getAchIds(e);
+  if (ids.length > 0) {
+    return importOfIds(e, ids);
+  }
+  let texts = enabled.map(e => e.humanText)
+  // 什么都不携带，发送指南
+  e.replyAt(`请发送“${texts.join('”或“')}”`);
+  if (userTimer[e.user_id]) {
+    clearTimeout(userTimer[e.user_id]);
+  }
+  userTimer[e.user_id] = setTimeout(() => {
     if (userTimer[e.user_id]) {
-      clearTimeout(userTimer[e.user_id]);
+      delete userTimer[e.user_id];
+      e.replyAt('成就录入已取消');
     }
-    userTimer[e.user_id] = setTimeout(() => {
-      if (userTimer[e.user_id]) {
-        delete userTimer[e.user_id];
-        e.replyAt('成就录入已取消');
-      }
-    }, 60000);
-    return true;
-  }
-  if (e.img.length > 12) {
-    e.replyAt('一次性最多发送12张图片…');
-    return true;
-  }
-  return downloadAndScanner(e, e.img, _type.IMAGE, MysApi);
+  }, 60000);
+  return true;
 }
 
 /** 递归 push 系列成就 */
-function pushSeries({id, preStage}, doneList) {
+function pushSeries({ id, preStage }, doneList) {
   if (preStage != null) {
     doneList.push({
       id: preStage,
@@ -59,6 +68,11 @@ export async function achImportCheck(e) {
     e.replyAt('请先绑定uid');
     return true;
   }
+  // 消息中携带成就ID
+  let ids = getAchIds(e);
+  if (ids.length > 0) {
+    return importOfIds(e, ids);
+  }
   let file, video;
   for (let msg of e.message) {
     if (msg.type === 'video') {
@@ -70,8 +84,9 @@ export async function achImportCheck(e) {
       break;
     }
   }
-  if (!e.img && !file && !video) {
-    e.replyAt('发送的内容不是图片或视频，成就录入已取消');
+  if (!e.img && !file && !video && !ids.length) {
+    let texts = settings.importMethod.enabled.map(e => e.humanText)
+    e.replyAt(`成就录入已取消，因为发送的内容不合法！\n请发送“${texts.join('”或“')}”\n也可发送“#成就帮助”来查看功能帮助。`);
     return true;
   }
   if (file) {
@@ -92,7 +107,7 @@ export async function achImportCheck(e) {
     if (isJson) {
       return importOfJson(e, url, MysApi);
     }
-    let type = isImage ? _type.IMAGE : _type.VIDEO;
+    let type = isImage ? _method.IMAGE : _method.VIDEO;
     return downloadAndScanner(e, [url], type, MysApi);
   } else if (video) {
     if (!/\.(mp4)$/.test(video.name)) {
@@ -105,29 +120,49 @@ export async function achImportCheck(e) {
     } else {
       url = await e.friend.getVideoUrl(video.fid, video.md5);
     }
-    return downloadAndScanner(e, [url], _type.VIDEO, MysApi);
+    return downloadAndScanner(e, [url], _method.VIDEO, MysApi);
   } else {
-    if (e.img.length > 12) {
-      e.replyAt('一次性最多发送12张图片…');
-      return true;
-    }
-    return downloadAndScanner(e, e.img, _type.IMAGE, MysApi);
+    return downloadAndScanner(e, e.img, _method.IMAGE, MysApi);
   }
+}
+
+/** 获取消息中的成就ID */
+function getAchIds(e) {
+  let match = (e.msg || '').match(/(\d{5}([,，、 ]\d{5})*)/);
+  if (match && match.length >= 1) {
+    let ids = match[1];
+    if (ids) {
+      return ids.split(/[,，、 ]/).map(id => parseInt(id));
+    }
+  }
+  return [];
 }
 
 /** 下载文件并识别 */
 async function downloadAndScanner(e, urls, type, MysApi) {
   let uid = MysApi.targetUid;
-  if (type === _type.VIDEO) {
+  if (type === _method.VIDEO) {
+    if (!settings.importMethod.check(_method.VIDEO)) {
+      e.replyAt('录屏成就录入已被禁用');
+      return true;
+    }
     e.replyAt('正在处理中，请稍等…\n录屏识别为未经完全验证的测试功能，识别错误率可能较高，请仔细核对确认或等待完善。');
   } else {
+    if (!settings.importMethod.check(_method.IMAGE)) {
+      e.replyAt('截图成就录入已被禁用');
+      return true;
+    }
+    if (urls.length > 12) {
+      e.replyAt('一次性最多发送12张图片…');
+      return true;
+    }
     e.replyAt('正在处理中，请稍等…');
   }
-  let suffix = type === _type.IMAGE ? '.jpg' : '.mp4';
+  let suffix = type === _method.IMAGE ? '.jpg' : '.mp4';
   // 保存所有文件
-  const {filePaths, errorCount} = await downloadFiles(e, urls, suffix);
+  const { filePaths, errorCount } = await downloadFiles(e, urls, suffix);
   if (filePaths.length === 0) {
-    e.replyAt(`${type === _type.IMAGE ? '图片' : '视频'}下载失败…`);
+    e.replyAt(`${type === _method.IMAGE ? '图片' : '视频'}下载失败…`);
     return true;
   }
   // 调用椰羊进行成就扫描
@@ -172,7 +207,7 @@ async function downloadAndScanner(e, urls, type, MysApi) {
     return true;
   }
   let userJsonName = `${uid}.json`;
-  let {saveData, writeUserJson} = readUserJson(userJsonName);
+  let { saveData, writeUserJson } = readUserJson(userJsonName);
   // 目前仅支持【天地万象】
   let saveDoneList = saveData.wonders_of_the_world;
   // 新增个数，重复个数
@@ -189,6 +224,15 @@ async function downloadAndScanner(e, urls, type, MysApi) {
   writeUserJson();
   e.replyAt(`本次成功识别了${successCount}个成就，新增记录了${saveCount}个成就。\n你可发送“#成就查漏”来查看你尚未完成的成就。`);
   return true;
+}
+
+/** TODO 手动录入成就ids */
+async function importOfIds(e, ids) {
+  if (!settings.importMethod.check(_method.INPUT)) {
+    e.replyAt('手动录入成就已被禁用');
+    return true;
+  }
+  return e.replyAt(`TODO 识别了：${ids.join(',')}`);
 }
 
 /** 从JSON导入成就 */
@@ -222,6 +266,10 @@ async function importOfJson(e, url, MysApi) {
 
 /** 从椰羊JSON导入 */
 async function importOfCocoGoatJson(e, json, uid) {
+  if (!settings.importMethod.check(_method.COCO_GOAT)) {
+    e.replyAt('从椰羊导入成就已被禁用');
+    return true;
+  }
   let userJsonName = `${uid}.json`;
   let { saveData, writeUserJson } = readUserJson(userJsonName);
   let saveDoneList = saveData.wonders_of_the_world;
@@ -285,7 +333,7 @@ async function cocoGoatScanner(fileList, type, e) {
         if (key === 'YUNZAI_CONSOLE_EXCHANGE') {
           let json = await payload.jsonValue();
           if (json) {
-            let {event, data} = json;
+            let { event, data } = json;
             if (event === 'load') {
               // 椰羊加载完成，开始上传文件
               if (data === true) {
@@ -326,7 +374,7 @@ async function cocoGoatScanner(fileList, type, e) {
 
                 // 进度超时
                 progressTimer = setTimeout(() => {
-                  if (type === _type.VIDEO) {
+                  if (type === _method.VIDEO) {
                     reject('扫描超时，你可能使用了不完整的chrome，导致录屏扫描功能不可用，请发送“#成就帮助”来获取帮助。');
                   } else {
                     reject('扫描超时，请稍后重试……');

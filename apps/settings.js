@@ -17,7 +17,7 @@ function getSettings(e) {
   msg.push(`欢迎使用成绩查漏插件${_version}\n`);
   msg.push("当前配置如下：");
   msg.push("- 成就录入方式：");
-  for (const [key, value] of Object.entries(settings.importMethod)) {
+  for (const [key, value] of Object.entries(settings.importMethod.value)) {
     let text = settings.getText(`importMethod.${key}`);
     msg.push(`  - ${text}：${value ? "已启用" : "已禁用"}`);
   }
@@ -28,7 +28,7 @@ function getSettings(e) {
 
 function updateImportMethod(e) {
   let [, action, method] = e.msg.match(regexp2);
-  let key = settings.getKeyByText(method);
+  let key = settings.getPathByText(method);
   if (!key) {
     e.reply(`未知的成就录入方式：${method}`);
     return true;

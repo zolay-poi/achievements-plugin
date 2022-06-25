@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import lodash from 'lodash';
-import {segment} from 'oicq';
+import { segment } from 'oicq';
 import fetch from 'node-fetch';
-import {promisify} from 'util';
-import {pipeline} from 'stream';
+import { promisify } from 'util';
+import { pipeline } from 'stream';
 import Data from '../../../lib/components/Data.js';
-import {browserInit} from '../../../lib/render.js';
-import Settings from "../models/Settings.js";
+import { browserInit } from '../../../lib/render.js';
+import Settings, { _method } from "../models/Settings.js";
 
 const pluginName = 'achievements-plugin';
 const _path = process.cwd();
@@ -15,12 +15,12 @@ const _path = process.cwd();
 const pluginsPath = path.join(_path, 'plugins', pluginName);
 // 资源目录
 const resourcesPath = path.join(pluginsPath, 'resources');
-// 配置目录
-const settingsPath = path.join(resourcesPath, 'settings.json');
 // 模板目录
 const templatePath = path.join(resourcesPath, 'template');
 // 用户已完成的成就记录保存目录
 const userDataPath = path.join(_path, 'data', pluginName);
+// 配置目录
+const settingsPath = path.join(userDataPath, 'settings.json');
 
 export const _version = '1.0.2';
 
@@ -31,11 +31,6 @@ export const _paths = {
   templatePath,
   userDataPath,
   settingsPath,
-};
-
-export const _type = {
-  IMAGE: 'image',
-  VIDEO: 'video',
 };
 
 export const settings = new Settings();
@@ -117,7 +112,7 @@ export function autoAt(e, ellipsis = true) {
   if (e.isGroup) {
     let name = e.sender.card;
     if (ellipsis) {
-      name = lodash.truncate(name, {length: 8});
+      name = lodash.truncate(name, { length: 8 });
     }
     return segment.at(e.user_id, name);
   }
@@ -155,7 +150,7 @@ export async function downloadFiles(e, urls, suffix) {
     await streamPipeline(response.body, fs.createWriteStream(filePath));
     filePaths.push(filePath);
   }
-  return {filePaths, errorCount};
+  return { filePaths, errorCount };
 }
 
 /**获取任意长度的随机数字字母组合字符串*/
@@ -165,6 +160,7 @@ export function randomString(length) {
 }
 
 export {
+  _method,
   Data,
-  browserInit
+  browserInit,
 };
