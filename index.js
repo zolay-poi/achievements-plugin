@@ -45,7 +45,7 @@ export function achRouter(e, components) {
   }
 }
 
-export const waitInputCheck = bind(apps.other.waitInputCheck);
+export const waitInputCheck = bind(otherApp.waitInputCheck);
 
 function bind(fn, options = {}) {
   return function (e, components, ...args) {

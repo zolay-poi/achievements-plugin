@@ -4,6 +4,7 @@ import { _version, settings } from "../utils/common.js";
 export function install(app) {
   app.register(/^#成就配置$/, getSettings, { isMaster: true });
   app.register(/^#成就配置录入(启用|禁用)(.+)$/, updateImportMethod, { isMaster: true });
+  app.register(/^#成就配置(重置|重新配置)$/, resetSettings, { isMaster: true });
 }
 
 function getSettings(e) {
@@ -29,5 +30,25 @@ function updateImportMethod(e, c, reg) {
   }
   settings.setAndSave(key, action === "启用");
   e.reply(`成就录入方式“${method}”已${action}`);
+  return true;
+}
+
+/** 重新配置成就插件 */
+function resetSettings(e) {
+  waitInputAt(e, {
+    key: 'ach-reset-settings',
+    message: `确定要重置成就插件的配置项吗？\n请发送“确定”继续，或者发送其他任意内容取消。`,
+    timeout: 12000,
+    checkFn: (e) => {
+      if (/^(确定|是|[Yy](es)?)$/.test((e.msg || '').trim())) {
+        settings.reset();
+        e.replyAt('重置成功，所有配置项已恢复为默认值。');
+      } else {
+        e.replyAt('已取消重置');
+      }
+      return true;
+    },
+    timeoutCb: () => e.replyAt('输入超时，请重试。'),
+  })
   return true;
 }

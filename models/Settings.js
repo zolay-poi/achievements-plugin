@@ -77,6 +77,12 @@ export default class Settings {
     saveSettings(this.$source);
   }
 
+  // 初始化配置文件
+  reset() {
+    initSettingsJson();
+    this.$source = this.read()
+  }
+
 }
 
 export const _method = {
