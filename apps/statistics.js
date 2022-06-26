@@ -9,7 +9,7 @@ export function install(app) {
 }
 
 // 成就查漏功能
-export async function actStatistics(e, {render}) {
+export async function actStatistics(e, c) {
   let MysApi = await getMysApi(e);
   if (!MysApi) return true;
   let uid = MysApi.targetUid;
@@ -19,10 +19,10 @@ export async function actStatistics(e, {render}) {
   }
   let res = await MysApi.getIndex();
   if (!res) return true;
-  let {achievement_number} = res.stats;
+  let { achievement_number } = res.stats;
 
   let userJsonName = `${uid}.json`;
-  let {saveData} = readUserJson(userJsonName)
+  let { saveData } = readUserJson(userJsonName)
   // 目前仅支持【天地万象】
   let doneList = saveData.wonders_of_the_world;
   if (doneList.length === 0) {
@@ -39,6 +39,22 @@ export async function actStatistics(e, {render}) {
       list.push(achievement);
     }
   }
+  if (list.length === 0) {
+    e.replyAt('恭喜你已经完成了「天地万象」中所有的成就了！');
+    return true;
+  }
+  let img = await renderStatistics(uid, e, c, list, {
+    achievement_number,
+  })
+  if (img) {
+    e.replyAt([`在「天地万象」中你还有 ${list.length} 个成就未完成，详情见下图`, img]);
+  } else {
+    e.replyAt('图片渲染失败……');
+  }
+  return true;
+}
+
+export async function renderStatistics(uid, e, { render }, list, renderOptions) {
   let pageNum = 1;
   let page = new Page(list, pageNum, 30);
   let patten = /.+[^\d](\d+)$/;
@@ -52,10 +68,6 @@ export async function actStatistics(e, {render}) {
       page.pageNum = pageNum;
     }
   }
-  if (page.records.length === 0) {
-    e.replyAt('恭喜你已经完成了「天地万象」中所有的成就了！');
-    return true;
-  }
   // 算出内容区域高度
   let topHeight = 202;
   let bottomHeight = 228;
@@ -66,23 +78,22 @@ export async function actStatistics(e, {render}) {
     middleHeight: middleHeight < 0 ? 0 : middleHeight,
     uid,
     user_id: e.user_id,
-    achievement_number,
     name: e.sender.card.replace(uid, '').trim(),
     pageInfo: `第 ${page.pageNum} / ${page.maxNum} 页`,
+    // 是否显示顶部的成就数量
+    showTopInfo: true,
+    ...renderOptions,
   });
   if (base64) {
-    e.replyAt([
-      `在「天地万象」中你还有 ${page.total} 个成就未完成，详情见下图`,
-      segment.image(`base64://${base64}`),
-    ]);
+    return segment.image(`base64://${base64}`);
   } else {
     e.replyAt('图片渲染失败……');
+    return null;
   }
-  return true;
 }
 
 /** 未实装的成就列表 */
-const NO_INSTALLATION = [
+export const NO_INSTALLATION = [
   // 测试数据
   84027,
   // 绀田祟神

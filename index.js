@@ -6,6 +6,7 @@ import * as otherApp from './apps/other.js';
 import * as importApp from './apps/import.js';
 import * as statisticsApp from './apps/statistics.js';
 import * as settingsApp from './apps/settings.js';
+import * as searchApp from './apps/search.js';
 
 export const rule = {
   achRouter: {
@@ -35,6 +36,7 @@ use(settingsApp);
 use(otherApp);
 use(importApp);
 use(statisticsApp);
+use(searchApp);
 
 // 路由
 export function achRouter(e, components) {
