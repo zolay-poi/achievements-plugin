@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import moment from 'moment';
 import { segment } from 'oicq';
 import { browserInit } from '../../../lib/render.js';
 import Data from '../../../lib/components/Data.js';
@@ -27,7 +28,7 @@ export async function achImport(e) {
   // 消息中携带成就ID
   let ids = getAchIds(e);
   if (ids.length > 0) {
-    return importOfIds(e, ids);
+    return importOfIds(e, ids, uid);
   }
   let texts = enabled.map(e => e.humanText)
   // 什么都不携带，发送指南
@@ -71,7 +72,7 @@ export async function achImportCheck(e) {
   // 消息中携带成就ID
   let ids = getAchIds(e);
   if (ids.length > 0) {
-    return importOfIds(e, ids);
+    return importOfIds(e, ids, uid);
   }
   let file, video;
   for (let msg of e.message) {
@@ -226,13 +227,46 @@ async function downloadAndScanner(e, urls, type, MysApi) {
   return true;
 }
 
-/** TODO 手动录入成就ids */
-async function importOfIds(e, ids) {
+/** 手动录入成就ids */
+async function importOfIds(e, ids, uid) {
   if (!settings.importMethod.check(_method.INPUT)) {
     e.replyAt('手动录入成就已被禁用');
     return true;
   }
-  return e.replyAt(`TODO 识别了：${ids.join(',')}`);
+  let userJsonName = `${uid}.json`;
+  let { saveData, writeUserJson } = readUserJson(userJsonName);
+  let saveDoneList = saveData.wonders_of_the_world;
+
+  // achievementsMap
+  let inputAchList = ids.map(id => achievementsMap.get(id)).filter(i => i != null);
+  if (inputAchList.length === 0) {
+    e.replyAt('录入失败：输入的成就id不存在…\n你可发送“#成就帮助”来查看功能说明。');
+    return true;
+  }
+  // 新增个数，重复个数
+  let saveCount = [], dupCount = 0;
+  let date = moment().format('YYYY/MM/DD');
+  for (const achItem of inputAchList) {
+    if (saveDoneList.findIndex(i => i.id === achItem.id) !== -1) {
+      dupCount++;
+    } else {
+      saveCount.push(achItem);
+      saveDoneList.push({
+        id: achItem.id,
+        date: date,
+        status: '手动勾选',
+      });
+    }
+  }
+  writeUserJson();
+  let message = [`成功识别了${inputAchList.length}个成就，新增记录了${saveCount.length}个成就。`];
+  for (let i = 0; i < saveCount.length; i++) {
+    const achItem = saveCount[i];
+    message.push(`· ${achItem.name}（${achItem.id}）`);
+  }
+  message.push(`你可发送“#成就查漏”来查看你尚未完成的成就。`);
+  e.replyAt(message.join('\n'));
+  return true;
 }
 
 /** 从JSON导入成就 */
