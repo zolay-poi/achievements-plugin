@@ -14,7 +14,7 @@
     <div class="left">
       <div class="name">天地万象</div>
       <div class="count">
-        达成成就<span>{{achievement_number}}</span>个
+        总达成成就<span>{{achievement_number}}</span>个
       </div>
     </div>
     <div class="right">
@@ -35,7 +35,10 @@
     <div class="item-box">
       {{each page.records item}}
       <div class="item icon0">
-        <div class="name">{{item.name}}</div>
+        <div class="name">
+          <span>{{item.name}}</span>
+          <span class="item-id">ID：{{item.id}}</span>
+        </div>
         <div class="desc">{{item.desc}}</div>
         <div class="reward">
           <div class="reward-num">{{item.reward}}</div>
