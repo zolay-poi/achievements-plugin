@@ -19,7 +19,7 @@ export async function achSearch(e, c, reg) {
   for (const achItem of achievementsMap.values()) {
     // 过滤未实装的成就
     if (NO_INSTALLATION.includes(achItem.id)) continue;
-    if (achItem.name.includes(keyword)) {
+    if (achItem.id.toString() === keyword || achItem.name.includes(keyword) || achItem.desc.includes(keyword)) {
       list.push(achItem)
     }
   }

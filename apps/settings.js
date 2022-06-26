@@ -9,7 +9,7 @@ export function install(app) {
 
 function getSettings(e) {
   let msg = [];
-  msg.push(`欢迎使用成绩查漏插件${_version}\n`);
+  msg.push(`欢迎使用成就查漏插件${_version}\n`);
   msg.push("当前配置如下：");
   msg.push("- 成就录入方式：");
   for (const [key, value] of Object.entries(settings.importMethod.value)) {
