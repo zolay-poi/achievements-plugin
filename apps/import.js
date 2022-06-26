@@ -37,7 +37,7 @@ export async function achImport(e) {
   let texts = enabled.map(e => e.humanText)
   // 什么都不携带，发送指南
   waitInputAt(e, {
-    key: 'ach-import',
+    key: `ach-import-${e.user_id}`,
     message: `请发送“${texts.splice(0, texts.length - 1).join('”、“')}”或“${texts.pop()}”`,
     timeout: 60000,
     checkFn: achImportCheck,

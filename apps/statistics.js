@@ -137,7 +137,7 @@ export async function achReset(e) {
     return true;
   }
   waitInputAt(e, {
-    key: 'ach-reset-self',
+    key: `ach-reset-${e.user_id}`,
     message: `确定要清空你录入的所有成就吗？此操作不可逆，请谨慎操作！\n请发送“确定”继续，或者发送其他任意内容取消。`,
     timeout: 12000,
     checkFn: (e) => {
