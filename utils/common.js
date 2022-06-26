@@ -22,7 +22,7 @@ const userDataPath = path.join(_path, 'data', pluginName);
 // 配置目录
 const settingsPath = path.join(userDataPath, 'settings.json');
 
-export const _version = '1.2.0';
+export const _version = '1.2.1';
 
 export const _paths = {
   rootPath: _path,
