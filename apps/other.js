@@ -1,5 +1,6 @@
-import {exec} from 'child_process';
-import {_paths} from '../utils/common.js';
+import { exec } from 'child_process';
+import { _paths } from '../utils/common.js';
+import { waitMap } from '../utils/waitInput.js';
 
 const _path = process.cwd();
 
@@ -59,4 +60,30 @@ export async function updateWithGit(e) {
 
   });
   return true;
+}
+
+export async function waitInputCheck(e, ...args) {
+  for (let [key, wait] of waitMap.entries()) {
+    if (typeof wait.checkFn === 'function') {
+      let flag = await wait.checkFn(e, ...args);
+      if (flag) {
+        clearWait(key, wait);
+        return true;
+      }
+    } else if (typeof wait.checkFn.test === 'function') {
+      let flag = wait.checkFn.test(e.msg);
+      if (flag) {
+        clearWait(key, wait);
+        let res = await wait.successCb(e);
+        if (res) {
+          return true;
+        }
+      }
+    }
+  }
+}
+
+function clearWait(key, wait) {
+  waitMap.delete(key);
+  clearTimeout(wait.timer);
 }

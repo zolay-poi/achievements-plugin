@@ -10,12 +10,8 @@ export const rule = {
     describe: '成就查漏功能',
     hashMark: true,
   },
-  // 用于检测用户上传的图片、视频
-  achImportCheck: {
-    reg: '',
-    priority: 0,
-    describe: '成就查漏功能',
-  },
+  // 用户输入检测
+  waitInputCheck: { reg: '', priority: 0, describe: '' },
 };
 
 const actionsMap = new Map();
@@ -44,7 +40,7 @@ export function achRouter(e, components) {
   }
 }
 
-export const achImportCheck = bind(importApp.achImportCheck);
+export const waitInputCheck = bind(apps.other.waitInputCheck);
 
 function bind(fn) {
   return function (e, components) {

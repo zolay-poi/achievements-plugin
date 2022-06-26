@@ -5,8 +5,7 @@ import { segment } from 'oicq';
 import { browserInit } from '../../../lib/render.js';
 import Data from '../../../lib/components/Data.js';
 import { _paths, settings, readUserJson, getMysApi, downloadFiles, achievementsMap, _method } from '../utils/common.js';
-
-let userTimer = {};
+import { waitInputAt } from '../utils/waitInput.js';
 
 export async function achImport(e) {
   let enabled = settings.importMethod.enabled
@@ -32,16 +31,13 @@ export async function achImport(e) {
   }
   let texts = enabled.map(e => e.humanText)
   // 什么都不携带，发送指南
-  e.replyAt(`请发送“${texts.join('”或“')}”`);
-  if (userTimer[e.user_id]) {
-    clearTimeout(userTimer[e.user_id]);
-  }
-  userTimer[e.user_id] = setTimeout(() => {
-    if (userTimer[e.user_id]) {
-      delete userTimer[e.user_id];
-      e.replyAt('成就录入已取消');
-    }
-  }, 60000);
+  waitInputAt(e, {
+    key: 'ach-import',
+    message: `请发送“${texts.splice(0, texts.length - 1).join('”、“')}”或“${texts.pop()}”`,
+    timeout: 60000,
+    checkFn: achImportCheck,
+    timeoutCb: () => e.replyAt('成就录入已取消'),
+  })
   return true;
 }
 
@@ -59,9 +55,6 @@ function pushSeries({ id, preStage }, doneList) {
 }
 
 export async function achImportCheck(e) {
-  if (!userTimer[e.user_id]) return;
-  clearTimeout(userTimer[e.user_id]);
-  delete userTimer[e.user_id];
   let MysApi = await getMysApi(e);
   if (!MysApi) return true;
   let uid = MysApi.targetUid;
