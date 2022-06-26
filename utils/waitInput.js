@@ -13,19 +13,21 @@ export const waitMap = new Map();
  * @param timeoutCb 超时回调，等待超时后会调用
  */
 export function waitInput(e, { key, checkFn, timeout = 10000, message = ["请输入"], successCb, timeoutCb }) {
-  let wait = waitMap.get(key);
+  let mapKey = getMapKey(e, key);
+  let wait = waitMap.get(mapKey);
   if (wait) {
     clearTimeout(wait.timer);
   }
   wait = {
     checkFn,
+    originKey: key,
     timer: setTimeout(() => {
-      waitMap.delete(key);
+      waitMap.delete(mapKey);
       timeoutCb && timeoutCb();
     }, timeout),
     successCb,
   }
-  waitMap.set(key, wait);
+  waitMap.set(mapKey, wait);
   return e.reply(message);
 }
 
@@ -37,4 +39,12 @@ export function waitInputAt(e, opt) {
     opt.message.unshift(autoAt(e));
   }
   return waitInput(e, opt);
+}
+
+export function getMapKey(e, key) {
+  let mapKey = `${key}-${e.user_id}`
+  if (e.isGroup) {
+    mapKey += `-${e.group_id}`;
+  }
+  return mapKey
 }

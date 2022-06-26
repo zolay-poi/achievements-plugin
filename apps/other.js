@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { _paths } from '../utils/common.js';
-import { waitMap } from '../utils/waitInput.js';
+import { getMapKey, waitMap } from '../utils/waitInput.js';
 
 const _path = process.cwd();
 
@@ -36,7 +36,7 @@ export async function updateWithGit(e) {
   } else {
     e.reply('正在执行更新操作，请稍等');
   }
-  exec(command, {cwd: _paths.pluginsPath}, function (error, stdout, stderr) {
+  exec(command, { cwd: _paths.pluginsPath }, function (error, stdout, stderr) {
     //console.log(stdout);
     if (/Already up[ -]to[ -]date/.test(stdout)) {
       e.reply('目前已经是最新版了~');
@@ -50,8 +50,8 @@ export async function updateWithGit(e) {
     timer && clearTimeout(timer);
     redis.set('zolay:restart-msg', JSON.stringify({
       msg: '重启成功，新版成就查漏Plugin已经生效~',
-      qq: e.user_id
-    }), {EX: 30});
+      qq: e.user_id,
+    }), { EX: 30 });
     timer = setTimeout(function () {
       let command = 'npm run restart';
       exec(command, function (error, stdout, stderr) {
@@ -71,17 +71,21 @@ export async function updateWithGit(e) {
 }
 
 export async function waitInputCheck(e, ...args) {
-  for (let [key, wait] of waitMap.entries()) {
+  for (let [mapKey, wait] of waitMap.entries()) {
+    let originKey = wait.originKey;
+    if (mapKey !== getMapKey(e, originKey)) {
+      continue;
+    }
     if (typeof wait.checkFn === 'function') {
       let flag = await wait.checkFn(e, ...args);
       if (flag) {
-        clearWait(key, wait);
+        clearWait(mapKey, wait);
         return true;
       }
     } else if (typeof wait.checkFn.test === 'function') {
       let flag = wait.checkFn.test(e.msg);
       if (flag) {
-        clearWait(key, wait);
+        clearWait(mapKey, wait);
         let res = await wait.successCb(e);
         if (res) {
           return true;
