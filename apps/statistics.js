@@ -1,11 +1,17 @@
+import fs from 'fs';
+import path from 'path';
 import { segment } from 'oicq';
 import Page from '../models/Page.js';
-import { achievementsMap, getMysApi, readUserJson } from '../utils/common.js';
+import { _paths, achievementsMap, getMysApi, readUserJson } from '../utils/common.js';
+import { waitInputAt } from '../utils/waitInput.js';
 
 export function install(app) {
   // #成就查漏
   // 可以根据已经识别的成就生成未完成的成就列表
   app.register(/^#成就(查漏|统计)/, actStatistics);
+  // #成就重置
+  // 强制重置自己的成就
+  app.register(/^#成就(重置|重新配置|清空)$/, achReset);
 }
 
 // 成就查漏功能
@@ -121,3 +127,32 @@ export const NO_INSTALLATION = [
   // 未曾设想的味道
   84521,
 ];
+
+export async function achReset(e) {
+  let MysApi = await getMysApi(e);
+  if (!MysApi) return true;
+  let uid = MysApi.targetUid;
+  if (!uid) {
+    e.replyAt('请先绑定uid');
+    return true;
+  }
+  waitInputAt(e, {
+    key: 'ach-reset-self',
+    message: `确定要清空你录入的所有成就吗？此操作不可逆，请谨慎操作！\n请发送“确定”继续，或者发送其他任意内容取消。`,
+    timeout: 12000,
+    checkFn: (e) => {
+      if (/^(确定|是|[Yy](es)?)$/.test((e.msg || '').trim())) {
+        let userJsonFile = path.join(_paths.userDataPath, `${uid}.json`);
+        if (fs.existsSync(userJsonFile)) {
+          fs.unlinkSync(userJsonFile);
+        }
+        e.replyAt('已成功清空所有录入的成就');
+      } else {
+        e.replyAt('已取消重置');
+      }
+      return true;
+    },
+    timeoutCb: () => e.replyAt('输入超时，请重试。'),
+  })
+  return true;
+}
