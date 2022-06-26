@@ -87,7 +87,8 @@ export async function achImportCheck(e) {
   }
   if (!e.img && !file && !video && !ids.length) {
     let texts = settings.importMethod.enabled.map(e => e.humanText)
-    e.replyAt(`成就录入已取消，因为发送的内容不合法！\n请发送“${texts.join('”或“')}”\n也可发送“#成就帮助”来查看功能帮助。`);
+    let need = `请发送“${texts.splice(0, texts.length - 1).join('”、“')}”或“${texts.pop()}”`;
+    e.replyAt(`成就录入已取消：发送的内容不合法！\n${need}\n也可发送“#成就帮助”来查看功能帮助。`);
     return true;
   }
   if (file) {
