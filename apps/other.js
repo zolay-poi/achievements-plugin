@@ -4,6 +4,15 @@ import { waitMap } from '../utils/waitInput.js';
 
 const _path = process.cwd();
 
+export function install(app) {
+  // #成就帮助
+  app.register(/^#成就(帮助|help)/, help);
+  // #成就插件更新
+  // #成就插件强制更新
+  // 主人命令
+  app.register(/^#成就插件更新$/, updateWithGit, { isMaster: true });
+}
+
 // 成就帮助
 export async function help(e) {
   let msg = ['成就查漏帮助：https://docs.qq.com/doc/DWmVRSnRwRldzcm13'];
@@ -19,7 +28,6 @@ let timer;
 // 更新
 // 代码借鉴：miao-plugin
 export async function updateWithGit(e) {
-  if (!e.isMaster) return false;
   let isForce = e.msg.includes('强制');
   let command = 'git pull';
   if (isForce) {

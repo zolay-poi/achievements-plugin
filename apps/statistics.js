@@ -1,8 +1,12 @@
-import path from 'path';
-import fs from 'fs';
+import { segment } from 'oicq';
 import Page from '../models/Page.js';
-import {Data, _paths, getMysApi, achievementsMap, readUserJson} from '../utils/common.js';
-import {segment} from 'oicq';
+import { achievementsMap, getMysApi, readUserJson } from '../utils/common.js';
+
+export function install(app) {
+  // #成就查漏
+  // 可以根据已经识别的成就生成未完成的成就列表
+  app.register(/^#成就(查漏|统计)/, actStatistics);
+}
 
 // 成就查漏功能
 export async function actStatistics(e, {render}) {

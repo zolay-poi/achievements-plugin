@@ -7,6 +7,11 @@ import Data from '../../../lib/components/Data.js';
 import { _paths, settings, readUserJson, getMysApi, downloadFiles, achievementsMap, _method } from '../utils/common.js';
 import { waitInputAt } from '../utils/waitInput.js';
 
+export function install(app) {
+  // #成就录入
+  app.register(/^#成就(录入|识别|扫描|记录)/, achImport);
+}
+
 export async function achImport(e) {
   let enabled = settings.importMethod.enabled
   if (enabled.length === 0) {

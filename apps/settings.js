@@ -1,15 +1,9 @@
-import {_version, settings} from "../utils/common.js";
+import { waitInputAt } from '../utils/waitInput.js';
+import { _version, settings } from "../utils/common.js";
 
-const regexp1 = /^#成就配置$/;
-const regexp2 = /^#成就配置录入(启用|禁用)(.+)$/;
-
-export async function settingsRouter(e) {
-  if (regexp1.test(e.msg)) {
-    return getSettings(e);
-  }
-  if (regexp2.test(e.msg)) {
-    return updateImportMethod(e);
-  }
+export function install(app) {
+  app.register(/^#成就配置$/, getSettings, { isMaster: true });
+  app.register(/^#成就配置录入(启用|禁用)(.+)$/, updateImportMethod, { isMaster: true });
 }
 
 function getSettings(e) {
@@ -26,8 +20,8 @@ function getSettings(e) {
   return true;
 }
 
-function updateImportMethod(e) {
-  let [, action, method] = e.msg.match(regexp2);
+function updateImportMethod(e, c, reg) {
+  let [, action, method] = e.msg.match(reg);
   let key = settings.getPathByText(method);
   if (!key) {
     e.reply(`未知的成就录入方式：${method}`);

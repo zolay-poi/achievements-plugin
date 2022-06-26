@@ -1,7 +1,11 @@
 import fs from 'fs';
-import apps from './apps/index.js';
 import { _version, _paths, loadAchievements, replyAt } from "./utils/common.js";
 import common from '../../lib/common.js';
+
+import * as otherApp from './apps/other.js';
+import * as importApp from './apps/import.js';
+import * as statisticsApp from './apps/statistics.js';
+import * as settingsApp from './apps/settings.js';
 
 export const rule = {
   achRouter: {
@@ -15,21 +19,22 @@ export const rule = {
 };
 
 const actionsMap = new Map();
-// #成就插件配置
-// 主人命令
-actionsMap.set(/^#成就配置/, bind(apps.settings.settingsRouter));
-// #成就录入
-// 需要发送图片或者视频
-actionsMap.set(/^#成就(录入|识别|扫描|记录)/, bind(apps.import.achImport));
-// #成就查漏
-// 可以根据已经识别的成就生成未完成的成就列表
-actionsMap.set(/^#成就(查漏|统计)/, bind(apps.statistics.actStatistics));
-// #成就帮助
-actionsMap.set(/^#成就(帮助|help)/, bind(apps.other.help));
-// #成就插件更新
-// #成就插件强制更新
-// 主人命令
-actionsMap.set(/^#成就插件更新$/, bind(apps.other.updateWithGit));
+
+function use(app) {
+  if (typeof app.install === 'function') {
+    let register = (reg, func, options) => {
+      actionsMap.set(reg, bind(func, options));
+    }
+    app.install({ register });
+  } else {
+    throw 'app.install is not a function';
+  }
+}
+
+use(settingsApp);
+use(otherApp);
+use(importApp);
+use(statisticsApp);
 
 // 路由
 export function achRouter(e, components) {
@@ -42,12 +47,13 @@ export function achRouter(e, components) {
 
 export const waitInputCheck = bind(apps.other.waitInputCheck);
 
-function bind(fn) {
-  return function (e, components) {
+function bind(fn, options = {}) {
+  return function (e, components, ...args) {
+    if (options.isMaster && !e.isMaster) return;
     e.replyAt = (...args) => replyAt(e, ...args);
     let render = components.render;
     components.render = (...args) => render('template', ...args);
-    return fn(e, components);
+    return fn(e, components, ...args);
   };
 }
 
