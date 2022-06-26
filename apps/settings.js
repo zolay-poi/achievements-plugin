@@ -36,7 +36,7 @@ function updateImportMethod(e, c, reg) {
 /** 重新配置成就插件 */
 function resetSettings(e) {
   waitInputAt(e, {
-    key: 'ach-reset-settings',
+    key: `ach-reset-settings-${e.user_id}`,
     message: `确定要重置成就插件的配置项吗？\n请发送“确定”继续，或者发送其他任意内容取消。`,
     timeout: 12000,
     checkFn: (e) => {
