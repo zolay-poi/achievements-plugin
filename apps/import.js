@@ -2,9 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
 import { segment } from 'oicq';
-import { browserInit } from '../../../lib/render.js';
-import Data from '../../../lib/components/Data.js';
-import { _paths, settings, readUserJson, getMysApi, downloadFiles, achievementsMap, _method } from '../utils/common.js';
+import Data from '../utils/Data.js';
+import { _paths, settings, readUserJson, getMysApi, downloadFiles, achievementsMap, _method, browserInit } from '../utils/common.js';
 import { waitInputAt } from '../utils/waitInput.js';
 
 export function install(app) {

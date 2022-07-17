@@ -4,6 +4,9 @@ import { segment } from 'oicq';
 import Page from '../models/Page.js';
 import { _paths, achievementsMap, getMysApi, readUserJson } from '../utils/common.js';
 import { waitInputAt } from '../utils/waitInput.js';
+import { dynamicImport, isV2 } from '../version/getVersion.js';
+
+const { default: MysInfo } = await dynamicImport('', '../../genshin/model/mys/mysInfo.js');
 
 export function install(app) {
   // #成就查漏
@@ -23,12 +26,19 @@ export async function actStatistics(e, c) {
     e.replyAt('请先绑定uid');
     return true;
   }
-  let res = await MysApi.getIndex();
+  // 【兼容写法】
+  let res;
+  if (isV2) {
+    res = await MysApi.getIndex();
+  } else {
+    res = await MysInfo.get(e, 'index');
+    if (res) res = res.data;
+  }
   if (!res) return true;
   let { achievement_number } = res.stats;
 
   let userJsonName = `${uid}.json`;
-  let { saveData } = readUserJson(userJsonName)
+  let { saveData } = readUserJson(userJsonName);
   // 目前仅支持【天地万象】
   let doneList = saveData.wonders_of_the_world;
   if (doneList.length === 0) {
@@ -51,7 +61,7 @@ export async function actStatistics(e, c) {
   }
   let img = await renderStatistics(uid, e, c, list, {
     achievement_number,
-  })
+  });
   if (img) {
     e.replyAt([`在「天地万象」中你还有 ${list.length} 个成就未完成，详情见下图`, img]);
   } else {
@@ -78,7 +88,7 @@ export async function renderStatistics(uid, e, { render }, list, renderOptions) 
   let topHeight = 202;
   let bottomHeight = 228;
   let middleHeight = (Math.round(116.8 * page.records.length) + 150) - (topHeight + bottomHeight);
-  let base64 = await render('statistics', {
+  let img = await render('statistics', {
     save_id: uid,
     page,
     middleHeight: middleHeight < 0 ? 0 : middleHeight,
@@ -90,8 +100,8 @@ export async function renderStatistics(uid, e, { render }, list, renderOptions) 
     showTopInfo: true,
     ...renderOptions,
   });
-  if (base64) {
-    return segment.image(`base64://${base64}`);
+  if (img) {
+    return img;
   } else {
     e.replyAt('图片渲染失败……');
     return null;
@@ -153,6 +163,6 @@ export async function achReset(e) {
       return true;
     },
     timeoutCb: () => e.replyAt('输入超时，请重试。'),
-  })
+  });
   return true;
 }

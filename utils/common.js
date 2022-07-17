@@ -5,9 +5,15 @@ import { segment } from 'oicq';
 import fetch from 'node-fetch';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
-import Data from '../../../lib/components/Data.js';
-import { browserInit } from '../../../lib/render.js';
-import Settings, { _method } from "../models/Settings.js";
+import Data from './Data.js';
+import Settings, { _method } from '../models/Settings.js';
+import { dynamicImport, isV3 } from '../version/getVersion.js';
+
+let { browserInit, default: Puppeteer } = await dynamicImport('../../../lib/render.js', '../../../lib/puppeteer/puppeteer.js');
+
+if (isV3) {
+  browserInit = Puppeteer.browserInit.bind(Puppeteer);
+}
 
 const pluginName = 'achievements-plugin';
 const _path = process.cwd();
@@ -22,7 +28,7 @@ const userDataPath = path.join(_path, 'data', pluginName);
 // 配置目录
 const settingsPath = path.join(userDataPath, 'settings.json');
 
-export const _version = '1.2.2';
+export const _version = '1.3.0';
 
 export const _paths = {
   rootPath: _path,
@@ -123,6 +129,16 @@ export function autoAt(e, ellipsis = true) {
 * 统一调用 e.getMysApi
 * */
 export async function getMysApi(e) {
+  if (isV3) {
+    let { default: MysInfo } = await import('../../genshin/model/mys/mysInfo.js');
+    if (MysInfo) {
+      let uid = MysInfo.getUid(e);
+      return {
+        // 【兼容】v3版本
+        uid, targetUid: uid,
+      };
+    }
+  }
   return await e.getMysApi({
     auth: 'all',
     targetType: 'self',
