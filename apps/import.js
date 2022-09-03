@@ -11,6 +11,14 @@ export function install(app) {
   app.register(/^#成就(录入|识别|扫描|记录)/, achImport);
 }
 
+function joinTexts(texts) {
+  if (texts.length > 1) {
+    return `“${texts.splice(0, texts.length - 1).join('”、“')}”或“${texts.pop()}”`
+  } else {
+    return `“${texts[0]}”`
+  }
+}
+
 export async function achImport(e) {
   let enabled = settings.importMethod.enabled
   if (enabled.length === 0) {
@@ -37,7 +45,7 @@ export async function achImport(e) {
   // 什么都不携带，发送指南
   waitInputAt(e, {
     key: `ach-import-${e.user_id}`,
-    message: `请发送“${texts.splice(0, texts.length - 1).join('”、“')}”或“${texts.pop()}”`,
+    message: `请发送${joinTexts(texts)}`,
     timeout: 60000,
     checkFn: achImportCheck,
     timeoutCb: () => e.replyAt('成就录入已取消'),
@@ -84,7 +92,7 @@ export async function achImportCheck(e) {
   }
   if (!e.img && !file && !video && !ids.length) {
     let texts = settings.importMethod.enabled.map(e => e.humanText)
-    let need = `请发送“${texts.splice(0, texts.length - 1).join('”、“')}”或“${texts.pop()}”`;
+    let need = `请发送${joinTexts(texts)}`;
     e.replyAt(`成就录入已取消：发送的内容不合法！\n${need}\n也可发送“#成就帮助”来查看功能帮助。`);
     return true;
   }
