@@ -132,7 +132,7 @@ export async function getMysApi(e) {
   if (isV3) {
     let { default: MysInfo } = await import('../../genshin/model/mys/mysInfo.js');
     if (MysInfo) {
-      let uid = MysInfo.getUid(e);
+      let uid = await MysInfo.getUid(e);
       return {
         // 【兼容】v3版本
         uid, targetUid: uid,

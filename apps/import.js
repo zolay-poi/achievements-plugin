@@ -67,6 +67,8 @@ function pushSeries({ id, preStage }, doneList) {
 }
 
 export async function achImportCheck(e) {
+  // 【V3兼容】发送纯图片或文件时msg为空，导致无法获取uid
+  if (!e.msg) e.msg = '-'
   let MysApi = await getMysApi(e);
   if (!MysApi) return true;
   let uid = MysApi.targetUid;
