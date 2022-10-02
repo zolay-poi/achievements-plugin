@@ -262,7 +262,7 @@ async function importOfIds(e, ids, uid) {
       saveDoneList.push({
         id: achItem.id,
         date: date,
-        status: '手动勾选',
+        status: 3,
       });
     }
   }
@@ -292,18 +292,60 @@ async function importOfJson(e, url, MysApi) {
     e.replyAt(`发送的JSON文件为空…`);
     return true;
   }
+  // 椰羊（旧）
   let isCocoGoat = json.source === '椰羊成就';
-  // 待支持
+  // UIAF
   let isUIAF = json.info && json.list;
   if (isCocoGoat) {
     return await importOfCocoGoatJson(e, json, uid);
   } else if (isUIAF) {
-    e.replyAt(`UIAF格式的JSON文件尚未支持…`);
-    return true;
+    return await importOfUIAFJson(e, json, uid);
   } else {
-    e.replyAt(`发送的不是椰羊JSON文件…`);
+    e.replyAt(`无法识别发送的JSON文件…`);
     return true;
   }
+}
+
+/** 导入UIAF格式的成就文件 */
+async function importOfUIAFJson(e, json, uid) {
+  if (!settings.importMethod.check(_method.COCO_GOAT)) {
+    e.replyAt('从JSON导入成就已被禁用');
+    return true;
+  }
+  const {info, list} = json
+  if(info.uiaf_version !== 'v1.1'){
+    e.replyAt(`仅支持v1.1的UIAF文件…`);
+    return
+  }
+  let userJsonName = `${uid}.json`;
+  let { saveData, writeUserJson } = readUserJson(userJsonName);
+  let saveDoneList = saveData.wonders_of_the_world;
+  // 新增个数，重复个数
+  let saveCount = 0, dupCount = 0;
+  // 去除重复的
+  let doneList =  list || [];
+  for (const achItem of doneList) {
+    // ACHIEVEMENT_INVALID = 0;
+    // ACHIEVEMENT_UNFINISHED = 1;
+    // ACHIEVEMENT_FINISHED = 2;
+    // ACHIEVEMENT_POINT_TAKEN = 3;
+    if (![2, 3].includes(achItem.status)) continue;
+    // 非天地万象的成就不处理
+    if(!achievementsMap.has(achItem.id)) continue;
+    if (saveDoneList.findIndex(i => i.id === achItem.id) !== -1) {
+      dupCount++;
+    } else {
+      saveCount++;
+      saveDoneList.push({
+        id: achItem.id,
+        date: moment.unix(achItem.timestamp).format('YYYY/MM/DD'),
+        status: achItem.status,
+      });
+    }
+  }
+  writeUserJson();
+  e.replyAt(`成功识别到${doneList.length}个成就。\n「天地万象」中新增记录了${saveCount}个成就。\n你可发送“#成就查漏”来查看你尚未完成的成就。`);
+  return true;
 }
 
 /** 从椰羊JSON导入 */
