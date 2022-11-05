@@ -11,6 +11,7 @@ export function install(app) {
 export async function achSearch(e, c, reg) {
   let match = e.msg.match(reg)
   let keyword = (match[2] || '').trim()
+  keyword = keyword.match(/(\D*)\d{0,2}/)[1]
   if (!keyword) {
     e.replyAt(`请输入要查询的关键词，如：#成就查询食神`);
     return true;
