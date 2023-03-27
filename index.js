@@ -1,5 +1,9 @@
 import { isV2 } from './version/getVersion.js';
 
+if (!global.segment) {
+  global.segment = (await import("oicq")).segment
+}
+
 const apps = {};
 const rule = {};
 

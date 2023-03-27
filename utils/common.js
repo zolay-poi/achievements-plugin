@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import lodash from 'lodash';
-import { segment } from 'oicq';
 import fetch from 'node-fetch';
 import { promisify } from 'util';
 import { pipeline } from 'stream';

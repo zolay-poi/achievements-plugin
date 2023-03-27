@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
-import { segment } from 'oicq';
 import Data from '../utils/Data.js';
 import { _paths, settings, readUserJson, getMysApi, downloadFiles, achievementsMap, _method, browserInit } from '../utils/common.js';
 import { waitInputAt } from '../utils/waitInput.js';

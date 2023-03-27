@@ -1,5 +1,4 @@
 import fs from 'fs';
-import { segment } from 'oicq';
 import { _paths, _version, loadAchievements, replyAt } from '../utils/common.js';
 import { dynamicImport, isV2 } from './getVersion.js';
 

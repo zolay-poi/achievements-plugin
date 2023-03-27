@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { segment } from 'oicq';
 import Page from '../models/Page.js';
 import { _paths, achievementsMap, getMysApi, readUserJson } from '../utils/common.js';
 import { waitInputAt } from '../utils/waitInput.js';
