@@ -6,12 +6,22 @@ import { promisify } from 'util';
 import { pipeline } from 'stream';
 import Data from './Data.js';
 import Settings, { _method } from '../models/Settings.js';
-import { dynamicImport, isV3 } from '../version/getVersion.js';
+import { dynamicImport, isV3, isMiao } from '../version/getVersion.js';
 
-let { browserInit, default: Puppeteer } = await dynamicImport('../../../lib/render.js', '../../../lib/puppeteer/puppeteer.js');
+let { browserInit, default: Puppeteer } = await dynamicImport(
+  '../../../lib/render.js',
+  '../../../lib/puppeteer/puppeteer.js',
+  // TODO 兼容miao-yunzai （临时吧，可能，后续还要改）
+  '../../../renderers/puppeteer/lib/puppeteer.js'
+);
 
 if (isV3) {
-  browserInit = Puppeteer.browserInit.bind(Puppeteer);
+  if (isMiao) {
+    const getPuppeteer = new Puppeteer({})
+    browserInit = getPuppeteer.browserInit.bind(getPuppeteer);
+  } else {
+    browserInit = Puppeteer.browserInit.bind(Puppeteer);
+  }
 }
 
 const pluginName = 'achievements-plugin';
@@ -27,7 +37,7 @@ const userDataPath = path.join(_path, 'data', pluginName);
 // 配置目录
 const settingsPath = path.join(userDataPath, 'settings.json');
 
-export const _version = '1.3.4';
+export const _version = '1.3.5';
 
 export const _paths = {
   rootPath: _path,

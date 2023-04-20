@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-let isV2 = false, isV3 = false;
+let isV2 = false, isV3 = false, isMiao = false;
 
 let pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 if (pkg && pkg.version) {
@@ -12,18 +12,28 @@ if (pkg && pkg.version) {
   }
 }
 
+// 兼容 miao-yunzai
+if (pkg && pkg.name) {
+  if (pkg.name === 'miao-yunzai') {
+    isMiao = true;
+  }
+}
+
 /**
  * 动态引入
  * @param v2Path
  * @param v3Path
+ * @param miaoPath
  */
-export async function dynamicImport(v2Path, v3Path) {
+export async function dynamicImport(v2Path, v3Path, miaoPath) {
   if (isV2) {
     if (v2Path) {
       return await import(v2Path);
     }
   } else {
-    if (v3Path) {
+    if (isMiao && miaoPath) {
+      return await import(miaoPath);
+    } else if (v3Path) {
       return await import(v3Path);
     }
   }
@@ -31,4 +41,4 @@ export async function dynamicImport(v2Path, v3Path) {
   return {};
 }
 
-export { isV2, isV3 };
+export { isV2, isV3, isMiao };
