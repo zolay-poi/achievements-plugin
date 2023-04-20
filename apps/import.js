@@ -187,7 +187,7 @@ async function downloadAndScanner(e, urls, type, MysApi) {
     // 删除临时文件
     filePaths.forEach((file) => fs.unlink(file, () => 0));
   }
-  let successCount = 0, failCount = 0, doneList = [];
+  let successCount = 0, unfinishedCount = 0, failCount = 0, doneList = [];
   for (const item of result) {
     if (item.success) {
       successCount++;
@@ -204,6 +204,8 @@ async function downloadAndScanner(e, urls, type, MysApi) {
           pushSeries(achItem, doneList);
         }
         doneList.push(achItem);
+      } else {
+        unfinishedCount++;
       }
     } else {
       // console.log('fail', {item});
@@ -230,7 +232,9 @@ async function downloadAndScanner(e, urls, type, MysApi) {
     }
   }
   writeUserJson();
-  e.replyAt(`本次成功识别了${successCount}个成就，新增记录了${saveCount}个成就。\n你可发送“#成就查漏”来查看你尚未完成的成就。`);
+  let unfinishedStr = unfinishedCount > 0 ? `，包含${unfinishedCount}个未完成的成就` : '';
+  let dupStr = dupCount > 0 ? `，包含${dupCount}个已记录的成就` : '';
+  e.replyAt(`本次成功识别了${successCount}个成就${unfinishedStr}${dupStr}，新增记录了${saveCount}个成就。\n你可发送“#成就查漏”来查看你尚未完成的成就。`);
   return true;
 }
 
