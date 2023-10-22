@@ -98,6 +98,8 @@ const SETTINGS_PRESET = [
   { path: `importMethod.${_method.IMAGE}`, def: true, text: "截图", humanText: "成就截图", desc: "截图文件" },
   { path: `importMethod.${_method.VIDEO}`, def: false, text: "录屏", humanText: "录屏文件", desc: "录屏文件" },
   { path: `importMethod.${_method.INPUT}`, def: true, text: "手动", humanText: "手动输入成就ID", desc: "手动输入成就ID" },
+
+  { path: `system.enableProxy`, def: false, text: "启用代理", humanText: "启用代理", desc: "启用代理" },
 ];
 
 /** 默认配置 */

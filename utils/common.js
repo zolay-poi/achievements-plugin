@@ -164,18 +164,58 @@ export async function downloadFiles(e, urls, suffix) {
   let filePaths = [];
   let errorCount = 0;
   for (let url of urls) {
-    let response = await fetch(url);
-    if (!response.ok) {
+    try {
+      let response = await fetch(url, {
+        agent: await getAgent(url)
+      });
+      if (!response.ok) {
+        errorCount++;
+        continue;
+      }
+      let streamPipeline = promisify(pipeline);
+      let fileName = randomString(18) + suffix;
+      let filePath = path.join(savePath, fileName);
+      await streamPipeline(response.body, fs.createWriteStream(filePath));
+      filePaths.push(filePath);
+    } catch (e) {
       errorCount++;
-      continue;
+      console.error(e)
     }
-    let streamPipeline = promisify(pipeline);
-    let fileName = randomString(18) + suffix;
-    let filePath = path.join(savePath, fileName);
-    await streamPipeline(response.body, fs.createWriteStream(filePath));
-    filePaths.push(filePath);
   }
   return { filePaths, errorCount };
+}
+
+let HttpsProxyAgent = null
+
+const autoEnableProxyReg = [
+  /cdn\.discordapp\.com/,
+  /media\.discordapp\.net/
+]
+
+async function getAgent(url) {
+  let enableProxy = settings.get('system.enableProxy')
+  if (!enableProxy) {
+    // 某些地址可自动开启代理
+    if (!autoEnableProxyReg.some(reg => reg.test(url))) {
+      return null;
+    }
+  }
+  let proxyAddress;
+  if (isV3) {
+    const { default: cfg } = await import( '../../../lib/config/config.js');
+    proxyAddress = cfg.bot.proxyAddress;
+  } else {
+    return null;
+  }
+  if (!proxyAddress) return null
+  if (proxyAddress === 'http://0.0.0.0:0') return null
+  if (!HttpsProxyAgent) {
+    HttpsProxyAgent = await import('https-proxy-agent').catch((err) => {
+      logger.error('import https-proxy-agent fail: ' + err);
+    })
+    HttpsProxyAgent = HttpsProxyAgent ? HttpsProxyAgent.HttpsProxyAgent : undefined
+  }
+  return HttpsProxyAgent ? new HttpsProxyAgent(proxyAddress) : null;
 }
 
 /**获取任意长度的随机数字字母组合字符串*/

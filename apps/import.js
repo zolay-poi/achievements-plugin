@@ -91,6 +91,16 @@ export async function achImportCheck(e) {
       file = msg;
       break;
     }
+    // 兼容 discord 的 application 消息
+    if (msg.type === 'application') {
+      file = {
+        ...msg,
+        type: 'file',
+        name: msg.filename,
+        fid: msg.id,
+      };
+      break;
+    }
   }
   if (!e.img && !file && !video && !ids.length) {
     let texts = settings.importMethod.enabled.map(e => e.humanText)
@@ -106,11 +116,18 @@ export async function achImportCheck(e) {
       e.replyAt('发送的文件不是静态图片或mp4格式的视频或椰羊JSON，成就录入已取消');
       return true;
     }
-    let url;
-    if (e.isGroup) {
-      url = await e.group.getFileUrl(file.fid);
-    } else {
-      url = await e.friend.getFileUrl(file.fid);
+    let url = file.url;
+    if (!url) {
+      if (e.isGroup) {
+        url = await e.group.getFileUrl?.(file.fid);
+      } else {
+        url = await e.friend.getFileUrl?.(file.fid);
+      }
+      if (!url) {
+        e.replyAt('获取文件URL失败，可能是该文件类型尚未支持，请附带控制台完整截图在Git上提交ISSUE等待解决。');
+        console.warn('[成就查漏] 不支持的文件类型：', file);
+        return true;
+      }
     }
     // 从JSON导入成就
     if (isJson) {
@@ -233,7 +250,7 @@ async function downloadAndScanner(e, urls, type, MysApi) {
     }
   }
   writeUserJson();
-  let unfinishedStr = unfinishedCount > 0 ? `，包含${unfinishedCount}个未完成的成就` : '';
+  let unfinishedStr = unfinishedCount > 0 ? `，包含${unfinishedCount}个识别为未完成的成就` : '';
   let dupStr = dupCount > 0 ? `，包含${dupCount}个已记录的成就` : '';
   e.replyAt(`本次成功识别了${successCount}个成就${unfinishedStr}${dupStr}，新增记录了${saveCount}个成就。\n你可发送“#成就查漏”来查看你尚未完成的成就。`);
   return true;

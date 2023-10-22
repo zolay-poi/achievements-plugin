@@ -52,6 +52,13 @@ export function supportGuoba() {
           bottomHelpMessage: '是否可以通过手动录入成就ID的方法录入成就（推荐开启）',
           component: 'Switch',
         },
+        {
+          field: 'system.enableProxy',
+          label: '启用代理',
+          helpMessage:'具体代理地址请去本体的 bot.yaml 中设置 proxyAddress',
+          bottomHelpMessage: '当文件访问失败时，可开启代理',
+          component: 'Switch',
+        },
       ],
       // 获取配置数据方法（用于前端填充显示数据）
       getConfigData() {

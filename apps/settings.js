@@ -2,9 +2,15 @@ import { waitInputAt } from '../utils/waitInput.js';
 import { _version, settings } from "../utils/common.js";
 
 export function install(app) {
-  app.register(/^#成就配置$/, getSettings, { isMaster: true });
-  app.register(/^#成就配置录入(启用|禁用)(.+)$/, updateImportMethod, { isMaster: true });
-  app.register(/^#成就配置(重置|重新配置)$/, resetSettings, { isMaster: true });
+  const con = { isMaster: true }
+
+  app.register(/^#成就配置$/, getSettings, { ...con });
+  app.register(/^#成就配置录入(启用|禁用)(.+)$/, updateImportMethod, { ...con });
+
+  app.register(/^#成就配置(开启|启用)代理$/, bindUS('system.enableProxy', true), { ...con });
+  app.register(/^#成就配置(关闭|禁用)代理$/, bindUS('system.enableProxy', false), { ...con });
+
+  app.register(/^#成就配置(重置|重新配置)$/, resetSettings, { ...con });
 }
 
 function getSettings(e) {
@@ -31,6 +37,25 @@ function updateImportMethod(e, c, reg) {
   settings.setAndSave(key, action === "启用");
   e.reply(`成就录入方式“${method}”已${action}`);
   return true;
+}
+
+/**
+ * 绑定更新配置的方法
+ * @param kp key path
+ * @param nv new value
+ */
+function bindUS(kp, nv) {
+  return function (e, c, reg) {
+    try {
+      settings.setAndSave(kp, nv);
+      e.replyAt('操作成功');
+      return true
+    } catch (e) {
+      e.replyAt('操作失败：' + e?.message ?? (e ?? '未知错误'));
+      console.error(e)
+      return false
+    }
+  }
 }
 
 /** 重新配置成就插件 */
