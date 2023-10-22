@@ -25,17 +25,6 @@ export async function actStatistics(e, c) {
     e.replyAt('请先绑定uid');
     return true;
   }
-  // 【兼容写法】
-  let res;
-  if (isV2) {
-    res = await MysApi.getIndex();
-  } else {
-    res = await MysInfo.get(e, 'index');
-    if (res) res = res.data;
-  }
-  if (!res) return true;
-  let { achievement_number } = res.stats;
-
   let userJsonName = `${uid}.json`;
   let { saveData } = readUserJson(userJsonName);
   // 目前仅支持【天地万象】
@@ -59,7 +48,7 @@ export async function actStatistics(e, c) {
     return true;
   }
   let img = await renderStatistics(uid, e, c, list, {
-    achievement_number,
+    ...(await getAchievementInfo(e, MysApi)),
   });
   if (img) {
     e.replyAt([`在「天地万象」中你还有 ${list.length} 个成就未完成，详情见下图`, img]);
@@ -164,4 +153,24 @@ export async function achReset(e) {
     timeoutCb: () => e.replyAt('输入超时，请重试。'),
   });
   return true;
+}
+
+/* 获取用户的成就信息 */
+async function getAchievementInfo(e, MysApi) {
+  // 不输出错误
+  const oldReply = e.reply
+  e.reply = () => void 0
+  // 【兼容写法】
+  let res;
+  if (isV2) {
+    res = await MysApi.getIndex();
+  } else {
+    res = await MysInfo.get(e, 'index');
+    if (res) res = res.data;
+  }
+  e.reply = oldReply
+
+  return {
+    achievement_number: res?.stats ?? null
+  }
 }

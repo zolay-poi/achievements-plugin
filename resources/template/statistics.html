@@ -15,7 +15,11 @@
     <div class="left">
       <div class="name">天地万象</div>
       <div class="count">
-        总达成成就<span>{{achievement_number}}</span>个
+        {{if achievement_number != null}}
+          总达成成就<span>{{achievement_number}}</span>个
+        {{else}}
+          总成就数量<span>获取失败</span>
+        {{/if}}
       </div>
     </div>
     <div class="right">
