@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
 import Data from '../utils/Data.js';
-import { _paths, settings, readUserJson, getMysApi, downloadFiles, achievementsMap, _method, browserInit } from '../utils/common.js';
+import { _paths, settings, achievementsMap, _method, browserInit } from '../utils/common.js';
+import { readUserJson, getMysApi, downloadFiles } from '../utils/common.js';
 import { waitInputAt } from '../utils/waitInput.js';
 
 export function install(app) {
@@ -315,8 +316,8 @@ async function importOfUIAFJson(e, json, uid) {
     e.replyAt('从JSON导入成就已被禁用');
     return true;
   }
-  const {info, list} = json
-  if(info.uiaf_version !== 'v1.1'){
+  const { info, list } = json
+  if (info.uiaf_version !== 'v1.1') {
     e.replyAt(`仅支持v1.1的UIAF文件…`);
     return
   }
@@ -326,7 +327,7 @@ async function importOfUIAFJson(e, json, uid) {
   // 新增个数，重复个数
   let saveCount = 0, dupCount = 0;
   // 去除重复的
-  let doneList =  list || [];
+  let doneList = list || [];
   for (const achItem of doneList) {
     // ACHIEVEMENT_INVALID = 0;
     // ACHIEVEMENT_UNFINISHED = 1;
@@ -334,7 +335,7 @@ async function importOfUIAFJson(e, json, uid) {
     // ACHIEVEMENT_POINT_TAKEN = 3;
     if (![2, 3].includes(achItem.status)) continue;
     // 非天地万象的成就不处理
-    if(!achievementsMap.has(achItem.id)) continue;
+    if (!achievementsMap.has(achItem.id)) continue;
     if (saveDoneList.findIndex(i => i.id === achItem.id) !== -1) {
       dupCount++;
     } else {
