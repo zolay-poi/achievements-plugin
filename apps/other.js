@@ -15,9 +15,9 @@ export function install(app) {
 
 // 成就帮助
 export async function help(e) {
-  let msg = ['成就查漏帮助：https://docs.qq.com/doc/DWmVRSnRwRldzcm13'];
+  let msg = '成就查漏帮助：https://docs.qq.com/doc/DWmVRSnRwRldzcm13';
   if (e.isMaster) {
-    msg.push('\n主人帮助：https://docs.qq.com/doc/DWktCdVJsWmFybUpi');
+    msg += '\n主人帮助：https://docs.qq.com/doc/DWktCdVJsWmFybUpi';
   }
   e.reply(msg);
   return true;

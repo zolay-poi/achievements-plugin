@@ -5,6 +5,7 @@ import Data from '../utils/Data.js';
 import { _paths, settings, achievementsMap, _method, browserInit } from '../utils/common.js';
 import { readUserJson, getMysApi, downloadFiles } from '../utils/common.js';
 import { waitInputAt } from '../utils/waitInput.js';
+import { matchFilename } from "../utils/adapter.js";
 
 export function install(app) {
   // #成就录入
@@ -69,6 +70,10 @@ function pushSeries({ id, preStage }, doneList) {
 export async function achImportCheck(e) {
   // 【V3兼容】发送纯图片或文件时msg为空，导致无法获取uid
   if (!e.msg) e.msg = '-'
+  // 处理wechat可能出现的此异常消息
+  if (e.msg === '消息超过字数限制，无法发送。') {
+    return false;
+  }
   let MysApi = await getMysApi(e);
   if (!MysApi) return true;
   let uid = MysApi.targetUid;
@@ -89,6 +94,10 @@ export async function achImportCheck(e) {
     }
     if (msg.type === 'file') {
       file = msg;
+      // 兼容其他平台的文件格式
+      if (!file.name) {
+        file.name = matchFilename(file.url)
+      }
       break;
     }
     // 兼容 discord 的 application 消息
@@ -307,7 +316,12 @@ async function importOfJson(e, url, MysApi) {
     e.replyAt(`文件下载失败…`);
     return true;
   }
-  let json = Data.readJSON(path.dirname(filePaths[0]), path.basename(filePaths[0]));
+  let json = ''
+  try {
+    json = Data.readJSON(path.dirname(filePaths[0]), path.basename(filePaths[0]));
+  } catch (e) {
+    console.error(e);
+  }
   // 判断JSON类型
   if (!json) {
     e.replyAt(`发送的JSON文件为空…`);

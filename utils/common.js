@@ -7,6 +7,7 @@ import { pipeline } from 'stream';
 import Data from './Data.js';
 import Settings, { _method } from '../models/Settings.js';
 import { dynamicImport, isV3, isMiao } from '../version/getVersion.js';
+import { isWeChatFile } from "./adapter.js";
 
 let { browserInit, default: Puppeteer } = await dynamicImport(
   '../../../lib/render.js',
@@ -165,17 +166,26 @@ export async function downloadFiles(e, urls, suffix) {
   let errorCount = 0;
   for (let url of urls) {
     try {
-      let response = await fetch(url, {
-        agent: await getAgent(url)
-      });
-      if (!response.ok) {
-        errorCount++;
-        continue;
-      }
-      let streamPipeline = promisify(pipeline);
       let fileName = randomString(18) + suffix;
       let filePath = path.join(savePath, fileName);
-      await streamPipeline(response.body, fs.createWriteStream(filePath));
+      if (isWeChatFile(url)) {
+        let response = await downloadForWeChat(e, url);
+        if (!response?.data) {
+          errorCount++;
+          continue;
+        }
+        fs.writeFileSync(filePath, Buffer.from(response.data));
+      } else {
+        let response = await fetch(url, {
+          agent: await getAgent(url),
+        });
+        if (!response.ok) {
+          errorCount++;
+          continue;
+        }
+        let streamPipeline = promisify(pipeline);
+        await streamPipeline(response.body, fs.createWriteStream(filePath));
+      }
       filePaths.push(filePath);
     } catch (e) {
       errorCount++;
@@ -183,6 +193,14 @@ export async function downloadFiles(e, urls, suffix) {
     }
   }
   return { filePaths, errorCount };
+}
+
+function downloadForWeChat(e, uri) {
+  const url = new URL(uri);
+  const fromUser = url.searchParams.get('fromuser')
+  const mediaId = url.searchParams.get('mediaid')
+  const fileName = url.searchParams.get('filename')
+  return e.bot.getDoc(fromUser, mediaId, fileName)
 }
 
 let HttpsProxyAgent = null
