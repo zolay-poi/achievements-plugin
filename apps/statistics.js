@@ -170,7 +170,10 @@ async function getAchievementInfo(e, MysApi) {
   }
   e.reply = oldReply
 
-  return {
-    achievement_number: res?.stats ?? null
+  if (!res?.stats) {
+    return {}
   }
+  return {
+    achievement_number: res.stats.achievement_number
+  };
 }
