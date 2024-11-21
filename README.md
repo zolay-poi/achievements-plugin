@@ -61,4 +61,5 @@ git -C ./plugins/achievements-plugin/ pull
     - 项目地址：<https://github.com/YuehaiTeam/cocogoat>
 2. GenshinData
     - 全成就列表的数据来源
+      - [wonders_of_the_world.json](https://github.com/dvaJi/genshin-data/blob/master/src/data/chinese-simplified/achievements/wonders_of_the_world.json)
     - 项目地址：<https://github.com/dvaJi/genshin-data>
