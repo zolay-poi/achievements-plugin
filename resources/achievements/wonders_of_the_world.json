@@ -3671,6 +3671,166 @@
       "order": 1541
     },
     {
+      "id": 81558,
+      "name": "总是雕像机关",
+      "desc": "将秘源龙仆放置回了为它空出的位置。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1553
+    },
+    {
+      "id": 81559,
+      "name": "喷发的光珥",
+      "desc": "见证了产生游隙灵道的巨大火山喷发。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1554
+    },
+    {
+      "id": 81560,
+      "name": "新火的祭台",
+      "desc": "到达图兰大火山的最高处。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1555
+    },
+    {
+      "id": 81561,
+      "name": "天轴轮转",
+      "desc": "启动「天轴」，前往远古圣城的深处。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1556
+    },
+    {
+      "id": 81562,
+      "name": "天鹰座裂隙之外",
+      "desc": "辉煌不过是往日残留的幻觉…",
+      "reward": 5,
+      "hidden": false,
+      "order": 1557
+    },
+    {
+      "id": 81563,
+      "name": "叩问众火之心",
+      "desc": "打开前往「圣山之心」的道路。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1558
+    },
+    {
+      "id": 81564,
+      "name": "如入巨龙的眼瞳",
+      "desc": "清除「圣山之心」的深渊影响，展露出其真实的样貌。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1559
+    },
+    {
+      "id": 81565,
+      "name": "创造朝向所想之路",
+      "desc": "选择了自己认为的更想前往的一方。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1560
+    },
+    {
+      "id": 81566,
+      "name": "往后你可自由地…",
+      "desc": "与龙伙伴告别。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1561
+    },
+    {
+      "id": 81567,
+      "name": "勇者之证",
+      "desc": "吹响英勇号角的曲调。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1562
+    },
+    {
+      "id": 81568,
+      "name": "凶手就是你！",
+      "desc": "找到了在「沃陆之邦」部族里四处惹祸的捣蛋鬼。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1563
+    },
+    {
+      "id": 81570,
+      "name": "孤独的坚守",
+      "desc": "成功帮助秘源龙仆从被废弃的试验场中脱困。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1565
+    },
+    {
+      "id": 81571,
+      "name": "极品飞龙",
+      "desc": "完成全部的「沃陆之邦」勇士挑战并获得最高等级的评价。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1566
+    },
+    {
+      "id": 81572,
+      "name": "最纯粹的「热度」",
+      "desc": "使温泉的「热度」恢复如初。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1567
+    },
+    {
+      "id": 81573,
+      "name": "重量级选手",
+      "desc": "面对三倍以上的体重差时，「技术」亦会失效。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1568
+    },
+    {
+      "id": 81574,
+      "name": "炽热的大脚",
+      "desc": "发现了「生物火雨」的真面目。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1569
+    },
+    {
+      "id": 81575,
+      "name": "巨像之影",
+      "desc": "完成所有的挑战，击败失落在外的秘源龙像。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1570
+    },
+    {
+      "id": 81577,
+      "name": "没有第三只吗？",
+      "desc": "击败炉壳山鼬三…两兄弟。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1572
+    },
+    {
+      "id": 81578,
+      "name": "我曾见她缀饰荧光的裙裾",
+      "desc": "完成纳塔所有的夜魂图腾挑战。",
+      "reward": 20,
+      "hidden": false,
+      "order": 1573
+    },
+    {
+      "id": 81579,
+      "name": "「速度，我就是速度！」",
+      "desc": "完成奔驰的挑战并登上领奖台。",
+      "reward": 5,
+      "hidden": false,
+      "order": 1574
+    },
+    {
       "id": 82008,
       "name": "无坚不摧",
       "desc": "在无相之岩复苏前，击碎所有复苏岩柱。",
