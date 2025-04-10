@@ -10,7 +10,7 @@ export function isWeChatFile(url) {
  * @return {string|null}
  */
 export function matchFilename(fileUrl) {
-  let match = fileUrl.match(weChatFileRegex);
+  const match = fileUrl?.match?.(weChatFileRegex);
   if (match) {
     return decodeURIComponent(match[1]);
   }

@@ -94,6 +94,20 @@ export async function achImportCheck(e) {
     }
     if (msg.type === 'file') {
       file = msg;
+      let url = file.url;
+      if (!url) {
+        const fid = file.fid || file.file_id;
+        if (e.isGroup) {
+          url = await e.group.getFileUrl?.(fid);
+        } else {
+          url = await e.friend.getFileUrl?.(fid);
+        }
+        if (!url) {
+          e.replyAt('获取文件URL失败，可能是该文件类型尚未支持，请附带控制台完整截图在Git上提交ISSUE等待解决。');
+          console.warn('[成就查漏] 不支持的文件类型：', file);
+          return true;
+        }
+      }
       // 兼容其他平台的文件格式
       if (!file.name) {
         file.name = matchFilename(file.url)
@@ -126,18 +140,6 @@ export async function achImportCheck(e) {
       return true;
     }
     let url = file.url;
-    if (!url) {
-      if (e.isGroup) {
-        url = await e.group.getFileUrl?.(file.fid);
-      } else {
-        url = await e.friend.getFileUrl?.(file.fid);
-      }
-      if (!url) {
-        e.replyAt('获取文件URL失败，可能是该文件类型尚未支持，请附带控制台完整截图在Git上提交ISSUE等待解决。');
-        console.warn('[成就查漏] 不支持的文件类型：', file);
-        return true;
-      }
-    }
     // 从JSON导入成就
     if (isJson) {
       return importOfJson(e, url, MysApi);
@@ -150,10 +152,11 @@ export async function achImportCheck(e) {
       return true;
     }
     let url;
+    const fid = video.fid || video.file_id;
     if (e.isGroup) {
-      url = await e.group.getVideoUrl(video.fid, video.md5);
+      url = await e.group.getVideoUrl(fid, video.md5);
     } else {
-      url = await e.friend.getVideoUrl(video.fid, video.md5);
+      url = await e.friend.getVideoUrl(fid, video.md5);
     }
     return downloadAndScanner(e, [url], _method.VIDEO, MysApi);
   } else {
