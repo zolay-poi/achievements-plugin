@@ -108,6 +108,7 @@ export async function achImportCheck(e) {
           return true;
         }
       }
+      file.url = url;
       // 兼容其他平台的文件格式
       if (!file.name) {
         file.name = matchFilename(file.url)
